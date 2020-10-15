@@ -6,6 +6,23 @@ tokens_file = open(file='tokens.txt', mode="w")
 symbol_table_file = open(file='symbol_table.txt', mode="w")
 
 tokens = []
+symbol_table = dict()
+symbol_table: typing.Dict
+symbol_table_counter = 1
+
+def add_to_symbol_table(lexeme: str):
+    print("hello")
+    global symbol_table_counter
+    if lexeme in symbol_table:
+        return
+    symbol_table[lexeme] = symbol_table_counter
+    symbol_table_file.write("%d.\t%s\n" % (symbol_table_counter, lexeme))
+    symbol_table_counter += 1
+
+#initial symbol table by all of possible keywords
+for keyword in Scanner.KEYWORDS:
+    add_to_symbol_table(keyword)
+
 
 
 def append_token_to_file(token_type: str, token_content: str):
@@ -40,6 +57,10 @@ def process_line_tokens(line_number: int):
     correct_tokens = []
     lexical_error_tokens = []
     for token in tokens:
+        # write to symbol_table.txt
+        if token[0] in ['KEYWORD', 'ID']:
+            add_to_symbol_table(token[1])
+        # write to tokens.txt and lexical_errors.txt
         if token[0] in ['NUM', 'SYMBOL', 'KEYWORD', 'ID']:
             correct_tokens.append(token)
         elif token[0] in ['Invalid number', 'Invalid input', 'Unmatched comment', 'Unclosed comment']:
