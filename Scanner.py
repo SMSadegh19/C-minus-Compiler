@@ -22,16 +22,6 @@ SIGMA = SIGMA.union(WHITESPACE)
 SIGMA.add('/')
 
 source_text = open(file='input.txt', mode="r")
-lexical_errors = open(file='lexical_errors.txt', mode="w")
-tokens_file = open(file='tokens.txt', mode="w")
-symbol_table_file = open(file='symbol_table.txt', mode="w")
-
-
-def build_transition_dict_by_list(ls: typing.List, destination: int):
-    transition_dict = {}
-    for char in ls:
-        transition_dict[char] = destination
-    return transition_dict
 
 
 class DFA:
@@ -171,37 +161,22 @@ def get_next_character():
 
 KEYWORDS = ['if', 'else', 'void', 'int', 'while', 'break', 'switch', 'default', 'case', 'return']
 
-
-def write_to_file(file, content: str):
-    file.write(content)
-
-
-def append_token_to_file(token_type: str, token_content: str, line_number: int):
-    write_to_file(tokens_file, "%d.  (%s, %s)\n" % (line_number, token_type, token_content))
+def check_if_keyword(token_type, token_content, token_line):
+    if token_type == 'ID' and token_content in KEYWORDS:
+        token_type = 'KEYWORD'
+    return token_type, token_content, token_line
 
 
-def append_lexical_error_to_file(token_type: str, token_content: str, line_number: int):
-    write_to_file(lexical_errors, "%d. (%s, %s)\n" % (line_number, token_type, token_content))
+current_line = 1
+refeed = False
+last_character = ''
 
-
-def process_dfa_token(token_type, token_content, line_number):
-    if token_type == 'ID':
-        if token_content in KEYWORDS:
-            append_token_to_file("KEYWORD", token_content, line_number)
-        else:
-            append_token_to_file("ID", token_content, line_number)
-    if token_type in ['NUM', 'SYMBOL']:
-        append_token_to_file(token_type, token_content, line_number)
-    if token_type in ['Invalid number', 'Invalid input', 'Unmatched comment', 'Unclosed comment']:
-        append_lexical_error_to_file(token_type, token_content, line_number)
-
+import time
 
 def get_next_token():
+    global current_line, refeed, last_character
     dfa.init_traversal(1)
-    import time
-    line_number = 1
-    refeed = False
-    last_character = ''
+    token_line = current_line
     while True:
         char = last_character
         if not refeed:
@@ -219,13 +194,12 @@ def get_next_token():
             refeed = False
 
         if result[0] in ['refeed node', 'terminal node']:
-            process_dfa_token(result[1], result[2], line_number)
+            token = check_if_keyword(result[1], result[2], token_line)
+            return token
 
         if char == '\n' and not refeed:
-            line_number += 1
+            current_line += 1
         if char == "EOF" and not refeed:
-            break
+            return 'EOF'
         time.sleep(0.001)
 
-
-get_next_token()
