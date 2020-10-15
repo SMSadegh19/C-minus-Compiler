@@ -94,7 +94,8 @@ nodes = [[1, False, None, False],
          [18, False, None, False],
          [19, True, "WHITESPACE", False],
          [20, True, "Invalid input", False],
-         [21, True, "Unclosed comment", True]
+         [21, True, "Unclosed comment", True],
+         [22, True, "Invalid input", False]
          ]
 
 for node in nodes:
@@ -133,7 +134,7 @@ for edge in edges:
     dfa.add_edge(from_node=edge[0], to_node=edge[1], chars=edge[2])
 
 non_sigma_edges = [[2, 3],
-                   [5, 6],
+                   [5, 22],
                    [8, 10],
                    [11, 12],
                    [15, 15],
