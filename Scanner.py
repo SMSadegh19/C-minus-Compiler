@@ -193,12 +193,13 @@ def get_next_token():
         else:
             refeed = False
 
+        if char == '\n' and not refeed:
+            current_line += 1
+
         if result[0] in ['refeed node', 'terminal node']:
             token = check_if_keyword(result[1], result[2], token_line)
             return token
 
-        if char == '\n' and not refeed:
-            current_line += 1
         if char == "EOF" and not refeed:
             return 'EOF'
         time.sleep(0.001)
