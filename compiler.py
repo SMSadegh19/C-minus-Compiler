@@ -1,29 +1,66 @@
+import typing
 import Scanner
 
-lexical_errors = open(file='lexical_errors.txt', mode="w")
+lexical_errors_file = open(file='lexical_errors.txt', mode="w")
 tokens_file = open(file='tokens.txt', mode="w")
 symbol_table_file = open(file='symbol_table.txt', mode="w")
+
+tokens = []
 
 def write_to_file(file, content: str):
     file.write(content)
 
 
-def append_token_to_file(token_type: str, token_content: str, line_number: int):
-    write_to_file(tokens_file, "%d.  (%s, %s)\n" % (line_number, token_type, token_content))
+def append_token_to_file(token_type: str, token_content: str):
+    write_to_file(tokens_file, "(%s, %s) " % (token_type, token_content))
 
 
-def append_lexical_error_to_file(token_type: str, token_content: str, line_number: int):
-    write_to_file(lexical_errors, "%d. (%s, %s)\n" % (line_number, token_type, token_content))
+def write_line_tokens(correct_tokens: typing.List, line_number: int):
+    if not correct_tokens:
+        return
+    write_to_file(tokens_file, "%d.\t" % (line_number))
+    for token in correct_tokens:
+        append_token_to_file(token[0], token[1])
+    write_to_file(tokens_file, "\n")
 
 
-def process_dfa_token(token_type, token_content, line_number):
-    if token_type in ['NUM', 'SYMBOL', 'KEYWORD', 'ID']:
-        append_token_to_file(token_type, token_content, line_number)
-    if token_type in ['Invalid number', 'Invalid input', 'Unmatched comment', 'Unclosed comment']:
-        append_lexical_error_to_file(token_type, token_content, line_number)
+
+def append_lexical_error_to_file(token_type: str, token_content: str):
+    write_to_file(lexical_errors_file, "(%s, %s) " % (token_content, token_type))
+
+
+def write_line_lexical_errors(lexical_error_tokens: typing.List, line_number: int):
+    if not lexical_error_tokens:
+        return
+    write_to_file(lexical_errors_file, "%d.\t" % (line_number))
+    for token in lexical_error_tokens:
+        append_lexical_error_to_file(token[0], token[1])
+    write_to_file(lexical_errors_file, "\n")
+
+
+def process_line_tokens(line_number: int):
+    global tokens
+    correct_tokens = []
+    lexical_error_tokens = []
+    for token in tokens:
+        if token[0] in ['NUM', 'SYMBOL', 'KEYWORD', 'ID']:
+            correct_tokens.append(token)
+        elif token[0] in ['Invalid number', 'Invalid input', 'Unmatched comment', 'Unclosed comment']:
+            lexical_error_tokens.append(token)
+    write_line_tokens(correct_tokens, line_number)
+    write_line_lexical_errors(lexical_error_tokens, line_number)
+    # emptying (tokens) list
+    tokens = []
 
 
 token = Scanner.get_next_token()
+current_line = token[2]
 while token != 'EOF':
-    process_dfa_token(token[0], token[1], token[2])
+    if token[2] != current_line:
+        process_line_tokens(current_line)
+        current_line = token[2]
+    tokens.append(token)
     token = Scanner.get_next_token()
+
+# last line
+process_line_tokens(current_line)
