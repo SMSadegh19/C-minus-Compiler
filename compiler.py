@@ -7,35 +7,32 @@ symbol_table_file = open(file='symbol_table.txt', mode="w")
 
 tokens = []
 
-def write_to_file(file, content: str):
-    file.write(content)
-
 
 def append_token_to_file(token_type: str, token_content: str):
-    write_to_file(tokens_file, "(%s, %s) " % (token_type, token_content))
+    tokens_file.write("(%s, %s) " % (token_type, token_content))
 
 
 def write_line_tokens(correct_tokens: typing.List, line_number: int):
     if not correct_tokens:
         return
-    write_to_file(tokens_file, "%d.\t" % (line_number))
+    tokens_file.write("%d.\t" % (line_number))
     for token in correct_tokens:
         append_token_to_file(token[0], token[1])
-    write_to_file(tokens_file, "\n")
+    tokens_file.write("\n")
 
 
 
 def append_lexical_error_to_file(token_type: str, token_content: str):
-    write_to_file(lexical_errors_file, "(%s, %s) " % (token_content, token_type))
+    lexical_errors_file.write("(%s, %s) " % (token_content, token_type))
 
 
 def write_line_lexical_errors(lexical_error_tokens: typing.List, line_number: int):
     if not lexical_error_tokens:
         return
-    write_to_file(lexical_errors_file, "%d.\t" % (line_number))
+    lexical_errors_file.write("%d.\t" % (line_number))
     for token in lexical_error_tokens:
         append_lexical_error_to_file(token[0], token[1])
-    write_to_file(lexical_errors_file, "\n")
+    lexical_errors_file.write("\n")
 
 
 def process_line_tokens(line_number: int):
