@@ -1,24 +1,17 @@
 import typing
+import string
+
+
+DIGITS = set(string.digits)
+LETTERS = set(string.ascii_letters)
 
 SIGMA = set()
-
-DIGITS = set()
-for i in range(10):
-    DIGITS.add(chr(i + ord('0')))
-LETTERS = set()
-for i in range(26):
-    LETTERS.add(chr(i + ord('a')))
-for i in range(26):
-    LETTERS.add(chr(i + ord('A')))
-
-SIGMA = SIGMA.union(DIGITS)
-SIGMA = SIGMA.union(LETTERS)
+SIGMA = SIGMA.union(DIGITS).union(LETTERS)
 
 SYMBOL = set(';:,[](){}+-*=<')
 WHITESPACE = set(' \n\r\t\v\f')
 
-SIGMA = SIGMA.union(SYMBOL)
-SIGMA = SIGMA.union(WHITESPACE)
+SIGMA = SIGMA.union(SYMBOL).union(WHITESPACE)
 SIGMA.add('/')
 
 source_text = open(file='input.txt', mode="r")
