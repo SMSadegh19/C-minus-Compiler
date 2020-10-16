@@ -1,18 +1,11 @@
 import typing
 import string
 
-
 DIGITS = set(string.digits)
 LETTERS = set(string.ascii_letters)
-
-SIGMA = set()
-SIGMA = SIGMA.union(DIGITS).union(LETTERS)
-
 SYMBOL = set(';:,[](){}+-*=<')
 WHITESPACE = set(' \n\r\t\v\f')
-
-SIGMA = SIGMA.union(SYMBOL).union(WHITESPACE)
-SIGMA.add('/')
+SIGMA = set.union(DIGITS).union(LETTERS).union(SYMBOL).union(WHITESPACE).union({'/'})
 
 source_text = open(file='input.txt', mode="r")
 
@@ -95,7 +88,8 @@ nodes = [[1, False, None, False],
          [19, True, "WHITESPACE", False],
          [20, True, "Invalid input", False],
          [21, True, "Unclosed comment", True],
-         [22, True, "Invalid input", False]
+         [22, True, "Invalid input", False],
+         [23, True, "Invalid input", True]
          ]
 
 for node in nodes:
@@ -104,7 +98,7 @@ for node in nodes:
 edges = [[1, 2, DIGITS],
          [2, 2, DIGITS],
          [2, 3, LETTERS],
-         [2, 4, set.union(SIGMA - LETTERS, {'EOF'})],
+         [2, 4, set.union(SIGMA - LETTERS - DIGITS, {'EOF'})],
          [1, 5, LETTERS],
          [5, 5, set.union(LETTERS, DIGITS)],
          [5, 6, SIGMA - set.union(LETTERS, DIGITS, {'EOF'})],
@@ -118,6 +112,7 @@ edges = [[1, 2, DIGITS],
          [1, 14, {'/'}],
          [14, 15, {'/'}],
          [14, 17, {'*'}],
+         [14, 23, SIGMA - {'/', '*', 'EOF'}],
          [15, 15, SIGMA - {'\n'}],
          [15, 16, {'\n', 'EOF'}],
          [17, 17, SIGMA - {'*'}],
@@ -140,7 +135,9 @@ non_sigma_edges = [[2, 3],
                    [15, 15],
                    [17, 17],
                    [18, 17],
-                   [1, 20]]
+                   [1, 20],
+                   [14, 23]
+                   ]
 
 for non_sigma_edge in non_sigma_edges:
     dfa.add_non_sigma_edge(non_sigma_edge[0], non_sigma_edge[1])
@@ -153,7 +150,8 @@ def get_next_character():
     return char
 
 
-KEYWORDS = ['if', 'else', 'void', 'int', 'while', 'break', 'switch', 'default', 'case', 'return']
+KEYWORDS = ['if', 'else', 'void', 'int', 'while', 'break', 'continue', 'switch', 'default', 'case', 'return']
+
 
 def check_if_keyword(token_type, token_content, token_line):
     if token_type == 'ID' and token_content in KEYWORDS:
@@ -165,7 +163,6 @@ current_line = 1
 refeed = False
 last_character = ''
 
-import time
 
 def get_next_token():
     global current_line, refeed, last_character
@@ -177,10 +174,8 @@ def get_next_token():
             char = get_next_character()
         if char == -1:
             char = "EOF"
-        # print("feeding char", "\'%s\'" % char, " to dfa")
         result = dfa.feed_character(char)
         last_character = char
-        # print(result)
 
         if result[0] == 'refeed node':
             refeed = True
@@ -190,12 +185,9 @@ def get_next_token():
         if char == '\n' and not refeed:
             current_line += 1
 
-
         if result[0] in ['refeed node', 'terminal node']:
             token = check_if_keyword(result[1], result[2], token_line)
             return token
 
         if char == "EOF" and not refeed:
             return 'EOF'
-        time.sleep(0.001)
-
