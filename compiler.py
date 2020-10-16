@@ -11,7 +11,6 @@ symbol_table: typing.Dict
 symbol_table_counter = 1
 
 def add_to_symbol_table(lexeme: str):
-    print("hello")
     global symbol_table_counter
     if lexeme in symbol_table:
         return
