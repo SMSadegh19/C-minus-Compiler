@@ -37,7 +37,6 @@ def write_line_tokens(correct_tokens: typing.List, line_number: int):
     tokens_file.write("\n")
 
 
-
 def append_lexical_error_to_file(token_type: str, token_content: str):
     lexical_errors_file.write("(%s, %s) " % (token_content, token_type))
 
