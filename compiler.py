@@ -1,3 +1,7 @@
+# compiler exercise 1
+# Amir Mohammad Ghasemi - 97100495
+# Mohammad Sadegh Salimi - 97101829
+
 import typing
 import Scanner
 
