@@ -150,7 +150,7 @@ def get_next_character():
     return char
 
 
-KEYWORDS = ['if', 'else', 'void', 'int', 'while', 'break', 'continue', 'switch', 'default', 'case', 'return']
+KEYWORDS = ['if', 'else', 'void', 'int', 'while', 'break', 'switch', 'default', 'case', 'return']
 
 
 def check_if_keyword(token_type, token_content, token_line):
