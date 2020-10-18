@@ -52,5 +52,5 @@ void main(void){
 int foo(int d, int e){
     int a;
     a = 5;
-    while (a < 10) if (a == 5) continue; else a = a + 1;
+    while (a < 10) if (a == 5) break; else a = a + 1;
 }

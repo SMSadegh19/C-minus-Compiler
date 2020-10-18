@@ -11,5 +11,5 @@
 11.	(KEYWORD, else) (SYMBOL, {)
 12.	(ID, a) (SYMBOL, =) (NUM, 4) (SYMBOL, ;)
 13.	(SYMBOL, })
-15.	(KEYWORD, continue) (SYMBOL, ;)
+15.	(KEYWORD, break) (SYMBOL, ;)
 16.	(SYMBOL, })
