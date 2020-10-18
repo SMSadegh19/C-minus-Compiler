@@ -51,7 +51,7 @@ def write_line_lexical_errors(lexical_error_tokens: typing.List, line_number: in
 
 
 def process_line_tokens(line_number: int):
-    global tokens
+    global tokens, has_lexical_error
     correct_tokens = []
     lexical_error_tokens = []
     for token in tokens:
@@ -62,6 +62,7 @@ def process_line_tokens(line_number: int):
         if token[0] in ['NUM', 'SYMBOL', 'KEYWORD', 'ID']:
             correct_tokens.append(token)
         elif token[0] in ['Invalid number', 'Invalid input', 'Unmatched comment', 'Unclosed comment']:
+            has_lexical_error = True
             lexical_error_tokens.append(token)
     write_line_tokens(correct_tokens, line_number)
     write_line_lexical_errors(lexical_error_tokens, line_number)
@@ -69,6 +70,7 @@ def process_line_tokens(line_number: int):
     tokens = []
 
 
+has_lexical_error = False
 token = Scanner.get_next_token()
 current_line = token[2]
 while token != 'EOF':
@@ -80,3 +82,7 @@ while token != 'EOF':
 
 # last line
 process_line_tokens(current_line)
+
+# print "There is no lexical error." in lexical_errors.txt
+if not has_lexical_error:
+    lexical_errors_file.write("There is no lexical error.")
