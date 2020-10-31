@@ -2,6 +2,7 @@ import typing
 
 terminals = set()
 non_terminals = set()
+grammars = set()
 first_sets = dict()
 follow_sets = dict()
 
@@ -22,7 +23,7 @@ class ParseTable:
             for t in terminals:
                 self.table[nt][t] = None
     
-    def fill_table(self, grammars: typing.List[Grammar]):
+    def fill_table(self, grammars: typing.Set[Grammar]):
         # put each grammar into LL(1) parse table
         for grammar in grammars: 
             for terminal in grammar.predict:
@@ -52,3 +53,19 @@ for line in lines:
     items = line.split()
     nt = items[0]
     follow_sets[nt] = set(items[1:])
+
+grammar_lines = grammars_file.readlines()
+predict_lines = predicts_file.readlines()
+for i in range(len(grammar_lines)):
+    items = grammar_lines[i].split()
+    predict = set(predict_lines[i].split())
+    grammar = Grammar(items[0], items[2:], predict)
+    grammars.add(grammar)
+
+
+for grammar in grammars:
+    for x in grammar.destination:
+        if x not in non_terminals:
+            terminals.add(x)
+
+
