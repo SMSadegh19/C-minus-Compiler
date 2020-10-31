@@ -1,12 +1,12 @@
 import typing
 
-terminals = {}
-non_terminals = {}
+terminals = set()
+non_terminals = set()
 first_sets = dict()
 follow_sets = dict()
 
 class Grammar:
-    def __init__(self, origin: str, destination: list, predict: list):
+    def __init__(self, origin: str, destination: list, predict: set):
         self.origin = origin
         self.destination = destination
         self.predict = predict
@@ -34,3 +34,21 @@ class ParseTable:
                     if self.table[nt][terminal] == None:
                         self.table[nt][terminal] = 'synch'
 
+
+firsts_file = open(file='Firsts.txt', mode='r')
+follows_file = open(file='Follows.txt', mode='r')
+predicts_file = open(file='Predicts.txt', mode='r')
+grammars_file = open(file='Grammars.txt', mode='r')
+
+lines = firsts_file.readlines()
+for line in lines:
+    items = line.split()
+    nt = items[0]
+    non_terminals.add(nt)
+    first_sets[nt] = set(items[1:])
+
+lines = follows_file.readlines()
+for line in lines:
+    items = line.split()
+    nt = items[0]
+    follow_sets[nt] = set(items[1:])
