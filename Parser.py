@@ -24,8 +24,7 @@ class ParseTable:
     
     def fill_table(self, grammars: typing.List[Grammar]):
         # put each grammar into LL(1) parse table
-        for grammar in grammars:
-            # we consider 
+        for grammar in grammars: 
             for terminal in grammar.predict:
                 self.table[grammar.origin][terminal] = grammar.destination
         # finding synch cells
