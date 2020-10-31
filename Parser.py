@@ -23,5 +23,14 @@ class ParseTable:
                 self.table[nt][t] = None
     
     def fill_table(self, grammers: typing.List[Grammer]):
-        
+        for grammer in grammers:
+            for terminal in grammer.predict:
+                self.table[grammer.origin][terminal] = grammer.destination
+            if grammer.destination[0] == 'ε':
+                for terminal in follow_sets[grammer.origin]:
+                    self.table[grammer.origin][terminal] = 'ε'
+        for nt in non_terminals:
+            if 'ε' not in first_sets[nt]:
+                for terminal in follow_sets[nt]:
+                    self.table[nt][terminal] = 'synch'
 
