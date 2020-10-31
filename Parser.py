@@ -31,5 +31,6 @@ class ParseTable:
         for nt in non_terminals:
             if 'ε' not in first_sets[nt]:
                 for terminal in follow_sets[nt]:
-                    self.table[nt][terminal] = 'synch'
+                    if self.table[nt][terminal] == None:
+                        self.table[nt][terminal] = 'synch'
 
