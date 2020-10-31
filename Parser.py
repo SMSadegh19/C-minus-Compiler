@@ -22,14 +22,12 @@ class ParseTable:
             for t in terminals:
                 self.table[nt][t] = None
     
-    def fill_table(self, grammars: typing.List[grammar]):
-        # put each grammar
+    def fill_table(self, grammars: typing.List[Grammar]):
+        # put each grammar into LL(1) parse table
         for grammar in grammars:
+            # we consider 
             for terminal in grammar.predict:
                 self.table[grammar.origin][terminal] = grammar.destination
-            if grammar.destination[0] == 'ε':
-                for terminal in follow_sets[grammar.origin]:
-                    self.table[grammar.origin][terminal] = 'ε'
         # finding synch cells
         for nt in non_terminals:
             if 'ε' not in first_sets[nt]:
