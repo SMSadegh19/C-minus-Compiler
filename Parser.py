@@ -1,4 +1,8 @@
 import typing
+from anytree import AnyNode, RenderTree
+
+# root = AnyNode(name='Program')
+# c1 = AnyNode(parent=root, name)
 
 terminals = set()
 non_terminals = set()
@@ -34,6 +38,11 @@ class ParseTable:
                 for terminal in follow_sets[nt]:
                     if self.table[nt][terminal] == None:
                         self.table[nt][terminal] = 'synch'
+
+
+def render_parse_tree(root):
+    parse_tree_file = open(file='parse_tree.txt', mode="w")
+    parse_tree_file.write(RenderTree(root).by_attr("name"))
 
 
 firsts_file = open(file='Firsts.txt', mode='r')
