@@ -69,3 +69,6 @@ for grammar in grammars:
             terminals.add(x)
 
 
+parse_table = ParseTable()
+parse_table.init_table()
+parse_table.fill_table(grammars)
