@@ -11,17 +11,17 @@ first_sets = dict()
 follow_sets = dict()
 
 
-class Grammar:
-    def __init__(self, origin: str, destination: list, predict: set):
-        self.origin = origin
-        self.destination = destination
-        self.predict = predict
+# class Grammar:
+    # def __init__(self, origin: str, destination: list, predict: set):
+    #     self.origin = origin
+    #     self.destination = destination
+    #     self.predict = predict
 
 
 class ParseTable:
     def __init__(self):
         self.table = dict()
-        self.table: typing.Dict[typing.Dict]
+        self.table: typing.Dict[typing.List]
 
     def init_table(self):
         for nt in non_terminals:
@@ -38,7 +38,7 @@ class ParseTable:
         for nt in non_terminals:
             if 'ε' not in first_sets[nt]:
                 for terminal in follow_sets[nt]:
-                    if self.table[nt][terminal] == None:
+                    if self.table[nt][terminal] is None:
                         self.table[nt][terminal] = 'synch'
 
 
@@ -52,30 +52,27 @@ follows_file = open(file='Follows.txt', mode='r')
 predicts_file = open(file='Predicts.txt', mode='r')
 grammar_file = open(file='phase 2/grammar.txt', mode='r')
 
-# lines = firsts_file.readlines()
-# for line in lines:
-#     items = line.split()
-#     nt = items[0]
-#     non_terminals.add(nt)
-#     first_sets[nt] = set(items[1:])
-#
-# lines = follows_file.readlines()
-# for line in lines:
-#     items = line.split()
-#     nt = items[0]
-#     follow_sets[nt] = set(items[1:])
-#
-# predict_lines = predicts_file.readlines()
-# for i in range(len(grammar_lines)):
-#     items = grammar_lines[i].split()
-#     predict = set(predict_lines[i].split())
-#     grammar = Grammar(items[0], items[2:], predict)
-#     grammars.add(grammar)
+
+lines = firsts_file.readlines()
+for line in lines:
+    symbols = line.split()
+    beginning_non_terminal = symbols[0]
+    first_sets[beginning_non_terminal] = set(symbols[1:])
+
+
+lines = follows_file.readlines()
+for line in lines:
+    symbols = line.split()
+    beginning_non_terminal = symbols[0]
+    follow_sets[beginning_non_terminal] = set(symbols[1:])
+
+
+predict_lines = predicts_file.readlines()
 
 
 grammar_lines = grammar_file.readlines()
 for line in grammar_lines:
-    symbols = line.split(' ')
+    symbols = line.split()
     beginning_non_terminal = symbols[0]
     if beginning_non_terminal not in non_terminals:
         non_terminals.append(beginning_non_terminal)
@@ -94,10 +91,7 @@ for line in grammar_lines:
 print(terminals)
 print(non_terminals)
 
-# for grammar in grammars:
-#     for x in grammar.destination:
-#         if x not in non_terminals:
-#             terminals.add(x)
+
 #
 # parse_table = ParseTable()
 # parse_table.init_table()
