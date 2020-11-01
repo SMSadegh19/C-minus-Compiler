@@ -164,7 +164,7 @@ refeed = False
 last_character = ''
 
 
-def get_next_token():
+def _get_next_token():
     global current_line, refeed, last_character
     dfa.init_traversal(1)
     token_line = current_line
@@ -190,4 +190,11 @@ def get_next_token():
             return token
 
         if char == "EOF" and not refeed:
-            return 'EOF'
+            return '$'
+
+
+def get_next_token():
+    while True:
+        token = _get_next_token()
+        if not token[0] in ['WHITESPACE', 'COMMENT']:
+            return token

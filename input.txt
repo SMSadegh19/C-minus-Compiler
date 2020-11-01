@@ -1,56 +1,19 @@
-int b;
-int foo(int d, int e){
-    int f;
-	void foo2(int k[]){
-		return k[0] + k[1];	
-	}
-	int fff[2];
-	fff[0] = d;
-	fff[1] = d + 1;
-	f = foo2(fff);
-	b = e + f;
-	while(d < 0){
-		f = f + d;
-		d = d - 1;
-		if (d == )
-			break;
-		else d = 1;
-	}
-	//comment1
-	return f + b;
-}
-int arr[3];
-void main(void){
+/*sample 7*/
+int foo(int x){
 	int a;
-	a = -3 + +11;
-	b = 5 * a + foo(a, a);
-	arr[1] = b + -3;
-	arr[2] = foo(arr[0], arr[1]);
-	if (b /*comment2*/ == 3){
-		arr[0] = -7;	
+	a = 10;
+	output(x);
+	if(a < x) {
+		return(-1);
 	}
-	else
-	{
-		switch (arr[2]){
-			case 2:
-				b = b + 1;
-			case 3:
-				b = b + 2;
-				return;
-			case :
-			{
-				u = 5;
-				b = u * -123;
-				break;}
-			default:
-				b = b - -1;
-		}	
+	 {
+		return(2);
 	}
-	return;
+}
+void main  ( void )
+{
+	int i;
+	i = foo (+4);
+	output (i);
 }
 
-int foo(int d, int e){
-    int a;
-    a = 5;
-    while (a < 10) if (a == 5) continue; else a = a + 1;
-}

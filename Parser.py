@@ -1,57 +1,22 @@
 import typing
-from anytree import AnyNode, RenderTree
+from anytree import AnyNode, RenderTree, Node
+import anytree
+from Scanner import get_next_token
 
 # root = AnyNode(name='Program')
 # c1 = AnyNode(parent=root, name)
 
-terminals = []
-non_terminals = []
+non_terminals = set()
 grammars = set()
 first_sets = dict()
 follow_sets = dict()
 
-
-# class Grammar:
-    # def __init__(self, origin: str, destination: list, predict: set):
-    #     self.origin = origin
-    #     self.destination = destination
-    #     self.predict = predict
-
-
-class ParseTable:
-    def __init__(self):
-        self.table = dict()
-        self.table: typing.Dict[typing.List]
-
-    def init_table(self):
-        for nt in non_terminals:
-            self.table[nt] = dict()
-            for t in terminals:
-                self.table[nt][t] = None
-
-    def fill_table(self, grammars: typing.Set[Grammar]):
-        # put each grammar into LL(1) parse table
-        for grammar in grammars:
-            for terminal in grammar.predict:
-                self.table[grammar.origin][terminal] = grammar.destination
-        # finding synch cells
-        for nt in non_terminals:
-            if 'ε' not in first_sets[nt]:
-                for terminal in follow_sets[nt]:
-                    if self.table[nt][terminal] is None:
-                        self.table[nt][terminal] = 'synch'
-
-
-def render_parse_tree(root):
-    parse_tree_file = open(file='parse_tree.txt', mode="w")
-    parse_tree_file.write(RenderTree(root).by_attr("name"))
-
+EPSILON = 'Îµ'
 
 firsts_file = open(file='Firsts.txt', mode='r')
 follows_file = open(file='Follows.txt', mode='r')
 predicts_file = open(file='Predicts.txt', mode='r')
 grammar_file = open(file='phase 2/grammar.txt', mode='r')
-
 
 lines = firsts_file.readlines()
 for line in lines:
@@ -59,41 +24,119 @@ for line in lines:
     beginning_non_terminal = symbols[0]
     first_sets[beginning_non_terminal] = set(symbols[1:])
 
-
 lines = follows_file.readlines()
 for line in lines:
     symbols = line.split()
     beginning_non_terminal = symbols[0]
     follow_sets[beginning_non_terminal] = set(symbols[1:])
 
-
 predict_lines = predicts_file.readlines()
-
 
 grammar_lines = grammar_file.readlines()
 for line in grammar_lines:
     symbols = line.split()
     beginning_non_terminal = symbols[0]
     if beginning_non_terminal not in non_terminals:
-        non_terminals.append(beginning_non_terminal)
+        non_terminals.add(beginning_non_terminal)
 
+table = dict()
+for non_terminal in non_terminals:
+    table[non_terminal] = dict()
 
-for line in grammar_lines:
-    line: str
+for i in range(len(predict_lines)):
+    line = grammar_lines[i]
     symbols = line.split()
-    for symbol in symbols[2:]:
-        if symbol not in non_terminals and symbol != 'Îµ':
-            if symbol == '$':
-                symbol = 'EOF'
-            if symbol not in terminals:
-                terminals.append(symbol)
+    left_non_terminal = symbols[0]
+    rule = symbols[2:]
+    predict_line = predict_lines[i]
+    predict_terminals = set(predict_line.split())
+    for p in predict_terminals:
+        if p != EPSILON:
+            table[left_non_terminal][p] = rule
 
-print(terminals)
-print(non_terminals)
+for non_terminal in non_terminals:
+    if EPSILON not in first_sets[non_terminal]:
+        for follow_terminal in follow_sets[non_terminal]:
+            if follow_terminal not in first_sets[non_terminal]:
+                table[non_terminal][follow_terminal] = 'sync'
+
+# stack = ["Program"]
+# token = get_next_token()
+"""
+while token != '$':
+    top = stack.pop()
+    token_type = token[1] if token[0] in ['SYMBOL', 'KEYWORD'] else token[0]
+    print("--------------------\n\n")
+    print("tokens: ", token, token_type)
+    print("stack:", top, list(reversed(stack)))
+    if top in non_terminals:
+        print("in non terminals")
+        # if token_type in table[top]:
+        print(table[top][token_type])
+
+        if table[top][token_type] != 'sync':
+            print("replacing ", table[top][token_type])
+            for symbol in reversed(table[top][token_type]):
+                if symbol != EPSILON:
+                    stack.append(symbol)
+            print("after stack:", list(reversed(stack)))
+        else:
+            print('         missing non terminal %s' % top)
+        # else:
+        #     print('illegal %s' % token_type)
+        #     token = get_next_token()
+    else:
+        if top == token_type:
+            print("         received token %s" % top)
+            token = get_next_token()
+        else:
+            print('         missing terminal %s' % top)
+    # input()
+"""
 
 
-#
-# parse_table = ParseTable()
-# parse_table.init_table()
-# parse_table.fill_table(grammars)
-#
+token = get_next_token()
+
+
+def dfs(*, label: str, parent: Node = None):
+    global token
+    token_type = token[1] if token[0] in ['SYMBOL', 'KEYWORD'] else token[0]
+    # print("--------------------\n\n")
+    # print("tokens: ", token, token_type)
+    # print("stack:", top, list(reversed(stack)))
+    node = anytree.Node(label)
+    if parent:
+        node.parent = parent
+
+    if label in non_terminals:
+        # print("in non terminals")
+        # if token_type in table[top]:
+        # print(table[label][token_type])
+
+        if table[label][token_type] != 'sync':
+            # print("replacing ", table[label][token_type])
+            for symbol in table[label][token_type]:
+                if symbol != EPSILON:
+                    dfs(label=symbol, parent=node)
+        else:
+            pass
+            print('         missing non terminal %s' % label)
+        # else:
+        #     print('illegal %s' % token_type)
+        #     token = get_next_token()
+    else:
+        if label == token_type:
+            # print("         received token %s" % label)
+            node.name = token
+            token = get_next_token()
+        else:
+            pass
+            print('         missing terminal %s' % label)
+    return node
+
+
+root = dfs(label='Program', parent=None)
+# print(RenderTree(root, style=anytree.render.DoubleStyle))
+
+for pre, _, node in RenderTree(root):
+    print("%s%s" % (pre, node.name))
