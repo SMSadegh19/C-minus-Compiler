@@ -190,11 +190,25 @@ def _get_next_token():
             return token
 
         if char == "EOF" and not refeed:
-            return '$'
+            return 'EOF', '$', token_line
 
 
 def get_next_token():
     while True:
         token = _get_next_token()
-        if not token[0] in ['WHITESPACE', 'COMMENT']:
-            return token
+        if token[0] in ['COMMENT', 'WHITESPACE']:
+            continue
+        elif token[0] in ['SYMBOL', 'KEYWORD']:
+            token_presentation = "(%s, %s)" % (token[0], token[1])
+            token_type = token[1]
+        elif token[0] in ['ID', 'NUM']:
+            token_presentation = "(%s, %s)" % (token[0], token[1])
+            token_type = token[0]
+        elif token[0] in ['EOF']:
+            token_presentation = "%s" % token[1]
+            token_type = token[1]
+        else:
+            print(token)
+            x = "(%s, %s, %s)" % (token[0], token[1], token[2])
+            raise Exception("strange token %s was found!" % x)
+        return token_type, token_presentation

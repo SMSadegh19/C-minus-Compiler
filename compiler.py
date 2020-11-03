@@ -75,14 +75,14 @@ def process_line_tokens(line_number: int):
 
 
 has_lexical_error = False
-token = Scanner._get_next_token()
-current_line = token[2]
-while token != 'EOF':
-    if token[2] != current_line:
+token_presentation = Scanner._get_next_token()
+current_line = token_presentation[2]
+while token_presentation != ('EOF', '$'):
+    if token_presentation[2] != current_line:
         process_line_tokens(current_line)
-        current_line = token[2]
-    tokens.append(token)
-    token = Scanner._get_next_token()
+        current_line = token_presentation[2]
+    tokens.append(token_presentation)
+    token_presentation = Scanner._get_next_token()
 
 # last line
 process_line_tokens(current_line)

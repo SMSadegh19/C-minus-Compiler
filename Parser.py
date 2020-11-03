@@ -1,10 +1,6 @@
 import typing
-from anytree import AnyNode, RenderTree, Node
 import anytree
 from Scanner import get_next_token
-
-# root = AnyNode(name='Program')
-# c1 = AnyNode(parent=root, name)
 
 non_terminals = set()
 grammars = set()
@@ -95,48 +91,57 @@ while token != '$':
 """
 
 
-token = get_next_token()
+token_type, token_presentation = get_next_token()
 
 
-def dfs(*, label: str, parent: Node = None):
-    global token
-    token_type = token[1] if token[0] in ['SYMBOL', 'KEYWORD'] else token[0]
+def dfs(*, label: str, parent: anytree.Node = None):
+    global token_presentation, token_type
     # print("--------------------\n\n")
     # print("tokens: ", token, token_type)
     # print("stack:", top, list(reversed(stack)))
+
     node = anytree.Node(label)
     if parent:
         node.parent = parent
+    if label == EPSILON:
+        node.name = 'epsilon'
+        return node
 
+    # print(token_presentation, token_type, label)
     if label in non_terminals:
         # print("in non terminals")
         # if token_type in table[top]:
         # print(table[label][token_type])
+        while (token_type not in table[label]) and token_type != '$':
+            print('         syntax error, illegal token', token_type)
+            token_type, token_presentation = get_next_token()
+            # print(token_presentation, token_type)
+        # if token_type == '$':
+        #     return node
 
-        if table[label][token_type] != 'sync':
+        if table[label][token_type] == 'sync':
+            pass
+            print('         missing %s' % label)
+        else:
             # print("replacing ", table[label][token_type])
             for symbol in table[label][token_type]:
-                if symbol != EPSILON:
+                if symbol != EPSILON or len(table[label][token_type]) == 1:
                     dfs(label=symbol, parent=node)
-        else:
-            pass
-            print('         missing non terminal %s' % label)
         # else:
         #     print('illegal %s' % token_type)
         #     token = get_next_token()
     else:
         if label == token_type:
             # print("         received token %s" % label)
-            node.name = token
-            token = get_next_token()
+            node.name = token_presentation
+            token_type, token_presentation = get_next_token()
         else:
             pass
-            print('         missing terminal %s' % label)
+            print('         syntax error, missing %s' % label)
     return node
 
 
 root = dfs(label='Program', parent=None)
-# print(RenderTree(root, style=anytree.render.DoubleStyle))
 
-for pre, _, node in RenderTree(root):
+for pre, _, node in anytree.RenderTree(root):
     print("%s%s" % (pre, node.name))
