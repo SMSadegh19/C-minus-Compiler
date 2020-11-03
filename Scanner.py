@@ -54,6 +54,9 @@ class Scanner:
                 token_presentation = "%s" % token[1]
                 token_type = token[1]
             else:
-                x = "(%s, %s, %s)" % (token[0], token[1], token[2])
-                raise Exception("strange token %s was found!" % x)
-            return token_type, token_presentation
+                continue
+                # x = "(%s, %s, %s)" % (token[0], token[1], token[2])
+                # raise Exception("strange token %s was found!" % x)
+            token_line = token[2]
+            # print(token_type, token_presentation, token_line)
+            return token_type, token_presentation, token_line

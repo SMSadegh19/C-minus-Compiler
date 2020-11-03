@@ -8,12 +8,13 @@ grammars = set()
 first_sets = dict()
 follow_sets = dict()
 
-EPSILON = 'Îµ'
+EPSILON = 'ε'
+# EPSILON = 'Îµ'
 
-firsts_file = open(file='phase 2/Firsts.txt', mode='r')
-follows_file = open(file='phase 2/Follows.txt', mode='r')
-predicts_file = open(file='phase 2/Predicts.txt', mode='r')
-grammar_file = open(file='phase 2/grammar.txt', mode='r')
+firsts_file = open(file='Firsts.txt', mode='r', encoding='utf-8')
+follows_file = open(file='Follows.txt', mode='r', encoding='utf-8')
+predicts_file = open(file='Predicts.txt', mode='r', encoding='utf-8')
+grammar_file = open(file='grammar.txt', mode='r', encoding='utf-8')
 
 lines = firsts_file.readlines()
 for line in lines:
@@ -92,11 +93,13 @@ while token != '$':
 """
 
 
+def print_error(error_line: int, error_message: str):
+    syntax_errors_file.write("#%s : %s\n" % (error_line, error_message))
+
+
 def dfs(*, label: str, parent: anytree.Node = None):
-    global token_presentation, token_type
-    # print("--------------------\n\n")
-    # print("tokens: ", token, token_type)
-    # print("stack:", top, list(reversed(stack)))
+    # print("entering node ", label)
+    global token_presentation, token_type, token_line
 
     node = anytree.Node(label)
     if parent:
@@ -105,45 +108,33 @@ def dfs(*, label: str, parent: anytree.Node = None):
         node.name = 'epsilon'
         return node
 
-    # print(token_presentation, token_type, label)
     if label in non_terminals:
-        # print("in non terminals")
-        # if token_type in table[top]:
-        # print(table[label][token_type])
         while (token_type not in table[label]) and token_type != '$':
-            print('         syntax error, illegal token', token_type)
-            token_type, token_presentation = scanner.get_next_token()
-            # print(token_presentation, token_type)
-        # if token_type == '$':
-        #     return node
-
+            print_error(token_line, "syntax error, illegal %s" % token_type)
+            token_type, token_presentation, token_line = scanner.get_next_token()
         if table[label][token_type] == 'sync':
-            pass
-            print('         missing %s' % label)
+            print_error(token_line, "missing %s" % label)
         else:
-            # print("replacing ", table[label][token_type])
             for symbol in table[label][token_type]:
                 if symbol != EPSILON or len(table[label][token_type]) == 1:
                     dfs(label=symbol, parent=node)
-        # else:
-        #     print('illegal %s' % token_type)
-        #     token = get_next_token()
     else:
         if label == token_type:
-            # print("         received token %s" % label)
             node.name = token_presentation
-            token_type, token_presentation = scanner.get_next_token()
+            token_type, token_presentation, token_line = scanner.get_next_token()
         else:
-            pass
-            print('         syntax error, missing %s' % label)
+            print_error(token_line, "syntax error, missing %s" % label)
     return node
 
 
-source = open(file='input.txt', mode="r")
+source = open(file='input.txt', mode="r", encoding='utf-8')
 scanner = Scanner(dfa=dfa, source=source)
-token_type, token_presentation = scanner.get_next_token()
+token_type, token_presentation, token_line = scanner.get_next_token()
+syntax_errors_file = open(file='syntax_errors.txt', mode='w')
+parse_tree_file = open(file='parse_tree.txt', mode='w', encoding='utf-8')
 
 root = dfs(label='Program', parent=None)
 
 for pre, _, node in anytree.RenderTree(root):
-    print("%s%s" % (pre, node.name))
+    s = "%s%s\n" % (pre, node.name)
+    parse_tree_file.writelines(s)
