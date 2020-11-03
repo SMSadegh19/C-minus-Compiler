@@ -3,7 +3,9 @@
 # Mohammad Sadegh Salimi - 97101829
 
 import typing
-import Scanner
+from Scanner import Scanner
+from ScannerDFA import dfa
+from Scanner import KEYWORDS
 
 lexical_errors_file = open(file='lexical_errors.txt', mode="w")
 tokens_file = open(file='tokens.txt', mode="w")
@@ -24,7 +26,7 @@ def add_to_symbol_table(lexeme: str):
     symbol_table_counter += 1
 
 
-for keyword in Scanner.KEYWORDS:
+for keyword in KEYWORDS:
     add_to_symbol_table(keyword)
 
 
@@ -74,15 +76,18 @@ def process_line_tokens(line_number: int):
     tokens = []
 
 
+source = open(file='input.txt', mode="r")
+scanner = Scanner(dfa=dfa, source=source)
+
 has_lexical_error = False
-token_presentation = Scanner._get_next_token()
+token_presentation = scanner._get_next_token()
 current_line = token_presentation[2]
-while token_presentation != ('EOF', '$'):
+while token_presentation[0] != 'EOF':
     if token_presentation[2] != current_line:
         process_line_tokens(current_line)
         current_line = token_presentation[2]
     tokens.append(token_presentation)
-    token_presentation = Scanner._get_next_token()
+    token_presentation = scanner._get_next_token()
 
 # last line
 process_line_tokens(current_line)

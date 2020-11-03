@@ -1,6 +1,7 @@
 import typing
 import anytree
-from Scanner import get_next_token
+from ScannerDFA import dfa
+from Scanner import Scanner
 
 non_terminals = set()
 grammars = set()
@@ -9,9 +10,9 @@ follow_sets = dict()
 
 EPSILON = 'Îµ'
 
-firsts_file = open(file='Firsts.txt', mode='r')
-follows_file = open(file='Follows.txt', mode='r')
-predicts_file = open(file='Predicts.txt', mode='r')
+firsts_file = open(file='phase 2/Firsts.txt', mode='r')
+follows_file = open(file='phase 2/Follows.txt', mode='r')
+predicts_file = open(file='phase 2/Predicts.txt', mode='r')
 grammar_file = open(file='phase 2/grammar.txt', mode='r')
 
 lines = firsts_file.readlines()
@@ -91,9 +92,6 @@ while token != '$':
 """
 
 
-token_type, token_presentation = get_next_token()
-
-
 def dfs(*, label: str, parent: anytree.Node = None):
     global token_presentation, token_type
     # print("--------------------\n\n")
@@ -114,7 +112,7 @@ def dfs(*, label: str, parent: anytree.Node = None):
         # print(table[label][token_type])
         while (token_type not in table[label]) and token_type != '$':
             print('         syntax error, illegal token', token_type)
-            token_type, token_presentation = get_next_token()
+            token_type, token_presentation = scanner.get_next_token()
             # print(token_presentation, token_type)
         # if token_type == '$':
         #     return node
@@ -134,12 +132,16 @@ def dfs(*, label: str, parent: anytree.Node = None):
         if label == token_type:
             # print("         received token %s" % label)
             node.name = token_presentation
-            token_type, token_presentation = get_next_token()
+            token_type, token_presentation = scanner.get_next_token()
         else:
             pass
             print('         syntax error, missing %s' % label)
     return node
 
+
+source = open(file='input.txt', mode="r")
+scanner = Scanner(dfa=dfa, source=source)
+token_type, token_presentation = scanner.get_next_token()
 
 root = dfs(label='Program', parent=None)
 
