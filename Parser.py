@@ -108,12 +108,17 @@ def dfs(*, label: str, parent: anytree.Node = None):
         node.name = 'epsilon'
         return node
 
+    error_node = False
     if label in non_terminals:
         while (token_type not in table[label]) and token_type != '$':
             print_error(token_line, "syntax error, illegal %s" % token_type)
             token_type, token_presentation, token_line = scanner.get_next_token()
-        if table[label][token_type] == 'sync':
+        if token_type == '$' and token_type not in table[label]:
+            print_error(token_line, "syntax error, Unexpected EOF")
+            error_node = True
+        elif table[label][token_type] == 'sync':
             print_error(token_line, "missing %s" % label)
+            error_node = True
         else:
             for symbol in table[label][token_type]:
                 if symbol != EPSILON or len(table[label][token_type]) == 1:
@@ -124,6 +129,9 @@ def dfs(*, label: str, parent: anytree.Node = None):
             token_type, token_presentation, token_line = scanner.get_next_token()
         else:
             print_error(token_line, "syntax error, missing %s" % label)
+            error_node = True
+    if error_node:
+        node.parent = None
     return node
 
 
