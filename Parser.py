@@ -58,45 +58,10 @@ for non_terminal in non_terminals:
             if follow_terminal not in first_sets[non_terminal]:
                 table[non_terminal][follow_terminal] = 'sync'
 
-# stack = ["Program"]
-# token = get_next_token()
-"""
-while token != '$':
-    top = stack.pop()
-    token_type = token[1] if token[0] in ['SYMBOL', 'KEYWORD'] else token[0]
-    print("--------------------\n\n")
-    print("tokens: ", token, token_type)
-    print("stack:", top, list(reversed(stack)))
-    if top in non_terminals:
-        print("in non terminals")
-        # if token_type in table[top]:
-        print(table[top][token_type])
-
-        if table[top][token_type] != 'sync':
-            print("replacing ", table[top][token_type])
-            for symbol in reversed(table[top][token_type]):
-                if symbol != EPSILON:
-                    stack.append(symbol)
-            print("after stack:", list(reversed(stack)))
-        else:
-            print('         missing non terminal %s' % top)
-        # else:
-        #     print('illegal %s' % token_type)
-        #     token = get_next_token()
-    else:
-        if top == token_type:
-            print("         received token %s" % top)
-            token = get_next_token()
-        else:
-            print('         missing terminal %s' % top)
-    # input()
-"""
-
-
 def print_error(error_line: int, error_message: str):
     syntax_errors_file.write("#%s : %s\n" % (error_line, error_message))
 
-
+"""
 def dfs(*, label: str, parent: anytree.Node = None):
     global token_presentation, token_type, token_line, EOF_error
     if EOF_error:
@@ -136,6 +101,7 @@ def dfs(*, label: str, parent: anytree.Node = None):
         node.parent = None
     return node
 
+"""
 
 source = open(file='input.txt', mode="r", encoding='utf-8')
 scanner = Scanner(dfa=dfa, source=source)
@@ -144,7 +110,50 @@ EOF_error = False
 syntax_errors_file = open(file='syntax_errors.txt', mode='w')
 parse_tree_file = open(file='parse_tree.txt', mode='w', encoding='utf-8')
 
-root = dfs(label='Program', parent=None)
+# root = dfs(label='Program', parent=None)
+root = None
+
+stack = [('Program', None)]
+
+while stack:
+    # print("entering node ", label, token_type, token_presentation)
+    # print(stack)
+    label, parent = stack.pop()
+    node = anytree.Node(label)
+    if parent:
+        node.parent = parent
+    if label == EPSILON:
+        node.name = 'epsilon'
+        continue
+    if label == "Program":
+        root = node
+
+    error_node = False
+    if label in non_terminals:
+        while (token_type not in table[label]) and token_type != '$':
+            print_error(token_line, "syntax error, illegal %s" % token_type)
+            token_type, token_presentation, token_line = scanner.get_next_token()
+        if token_type == '$' and token_type not in table[label]:
+            print_error(token_line, "syntax error, Unexpected EOF")
+            node.parent = None
+            break
+        elif table[label][token_type] == 'sync':
+            print_error(token_line, "missing %s" % label)
+            error_node = True
+        else:
+            for symbol in reversed(table[label][token_type]):
+                if symbol != EPSILON or len(table[label][token_type]) == 1:
+                    stack.append((symbol, node))
+    else:
+        if label == token_type:
+            node.name = token_presentation
+            token_type, token_presentation, token_line = scanner.get_next_token()
+        else:
+            print_error(token_line, "syntax error, missing %s" % label)
+            error_node = True
+    if error_node:
+        node.parent = None
+
 
 for pre, _, node in anytree.RenderTree(root):
     s = "%s%s\n" % (pre, node.name)
