@@ -7,6 +7,7 @@ non_terminals = set()
 grammars = set()
 first_sets = dict()
 follow_sets = dict()
+has_syntax_error = False
 
 EPSILON = 'ε'
 # EPSILON = 'Îµ'
@@ -95,6 +96,8 @@ while token != '$':
 
 def print_error(error_line: int, error_message: str):
     syntax_errors_file.write("#%s : %s\n" % (error_line, error_message))
+    global has_syntax_error
+    has_syntax_error = True
 
 
 def dfs(*, label: str, parent: anytree.Node = None):
@@ -119,7 +122,7 @@ def dfs(*, label: str, parent: anytree.Node = None):
             EOF_error = True
             error_node = True
         elif table[label][token_type] == 'sync':
-            print_error(token_line, "missing %s" % label)
+            print_error(token_line, "syntax error, missing %s" % label)
             error_node = True
         else:
             for symbol in table[label][token_type]:
@@ -149,3 +152,6 @@ root = dfs(label='Program', parent=None)
 for pre, _, node in anytree.RenderTree(root):
     s = "%s%s\n" % (pre, node.name)
     parse_tree_file.writelines(s)
+
+if not has_syntax_error:
+    syntax_errors_file.write("There is no syntax error.")
