@@ -98,9 +98,10 @@ def print_error(error_line: int, error_message: str):
 
 
 def dfs(*, label: str, parent: anytree.Node = None):
-    # print("entering node ", label)
-    global token_presentation, token_type, token_line
-
+    global token_presentation, token_type, token_line, EOF_error
+    if EOF_error:
+        return
+    # print("entering node ", label, token_type, token_presentation)
     node = anytree.Node(label)
     if parent:
         node.parent = parent
@@ -115,6 +116,7 @@ def dfs(*, label: str, parent: anytree.Node = None):
             token_type, token_presentation, token_line = scanner.get_next_token()
         if token_type == '$' and token_type not in table[label]:
             print_error(token_line, "syntax error, Unexpected EOF")
+            EOF_error = True
             error_node = True
         elif table[label][token_type] == 'sync':
             print_error(token_line, "missing %s" % label)
@@ -138,6 +140,7 @@ def dfs(*, label: str, parent: anytree.Node = None):
 source = open(file='input.txt', mode="r", encoding='utf-8')
 scanner = Scanner(dfa=dfa, source=source)
 token_type, token_presentation, token_line = scanner.get_next_token()
+EOF_error = False
 syntax_errors_file = open(file='syntax_errors.txt', mode='w')
 parse_tree_file = open(file='parse_tree.txt', mode='w', encoding='utf-8')
 
