@@ -61,7 +61,7 @@ for non_terminal in non_terminals:
 def print_error(error_line: int, error_message: str):
     syntax_errors_file.write("#%s : %s\n" % (error_line, error_message))
 
-"""
+
 def dfs(*, label: str, parent: anytree.Node = None):
     global token_presentation, token_type, token_line, EOF_error
     if EOF_error:
@@ -101,7 +101,7 @@ def dfs(*, label: str, parent: anytree.Node = None):
         node.parent = None
     return node
 
-"""
+
 
 source = open(file='input.txt', mode="r", encoding='utf-8')
 scanner = Scanner(dfa=dfa, source=source)
