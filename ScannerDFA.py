@@ -87,7 +87,9 @@ nodes = [[1, False, None, False],
          [20, True, "Invalid input", False],
          [21, True, "Unclosed comment", True],
          [22, True, "Invalid input", False],
-         [23, True, "Invalid input", True]
+         [23, True, "Invalid input", True],
+         [24, True, "Invalid input", False],
+         [25, True, "Invalid input", False]
          ]
 
 for node in nodes:
@@ -128,13 +130,13 @@ for edge in edges:
 
 non_sigma_edges = [[2, 3],
                    [5, 22],
-                   [8, 10],
-                   [11, 12],
+                   [8, 24],
+                   [11, 24],
                    [15, 15],
                    [17, 17],
                    [18, 17],
                    [1, 20],
-                   [14, 23]
+                   [14, 25]
                    ]
 
 for non_sigma_edge in non_sigma_edges:
