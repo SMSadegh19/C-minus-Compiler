@@ -10,7 +10,6 @@ follow_sets = dict()
 has_syntax_error = False
 
 EPSILON = 'ε'
-# EPSILON = 'Îµ'
 
 firsts_file = open(file='Firsts.txt', mode='r', encoding='utf-8')
 follows_file = open(file='Follows.txt', mode='r', encoding='utf-8')
@@ -50,8 +49,7 @@ for i in range(len(predict_lines)):
     predict_line = predict_lines[i]
     predict_terminals = set(predict_line.split())
     for p in predict_terminals:
-        if p != EPSILON:
-            table[left_non_terminal][p] = rule
+        table[left_non_terminal][p] = rule
 
 for non_terminal in non_terminals:
     if EPSILON not in first_sets[non_terminal]:
@@ -59,51 +57,11 @@ for non_terminal in non_terminals:
             if follow_terminal not in first_sets[non_terminal]:
                 table[non_terminal][follow_terminal] = 'sync'
 
+
 def print_error(error_line: int, error_message: str):
     syntax_errors_file.write("#%s : %s\n" % (error_line, error_message))
     global has_syntax_error
     has_syntax_error = True
-
-
-def dfs(*, label: str, parent: anytree.Node = None):
-    global token_presentation, token_type, token_line, EOF_error
-    if EOF_error:
-        return
-    # print("entering node ", label, token_type, token_presentation)
-    node = anytree.Node(label)
-    if parent:
-        node.parent = parent
-    if label == EPSILON:
-        node.name = 'epsilon'
-        return node
-
-    error_node = False
-    if label in non_terminals:
-        while (token_type not in table[label]) and token_type != '$':
-            print_error(token_line, "syntax error, illegal %s" % token_type)
-            token_type, token_presentation, token_line = scanner.get_next_token()
-        if token_type == '$' and token_type not in table[label]:
-            print_error(token_line, "syntax error, Unexpected EOF")
-            EOF_error = True
-            error_node = True
-        elif table[label][token_type] == 'sync':
-            print_error(token_line, "syntax error, missing %s" % label)
-            error_node = True
-        else:
-            for symbol in table[label][token_type]:
-                if symbol != EPSILON or len(table[label][token_type]) == 1:
-                    dfs(label=symbol, parent=node)
-    else:
-        if label == token_type:
-            node.name = token_presentation
-            token_type, token_presentation, token_line = scanner.get_next_token()
-        else:
-            print_error(token_line, "syntax error, missing %s" % label)
-            error_node = True
-    if error_node:
-        node.parent = None
-    return node
-
 
 
 source = open(file='input.txt', mode="r", encoding='utf-8')
@@ -113,7 +71,7 @@ EOF_error = False
 syntax_errors_file = open(file='syntax_errors.txt', mode='w')
 parse_tree_file = open(file='parse_tree.txt', mode='w', encoding='utf-8')
 
-# root = dfs(label='Program', parent=None)
+
 root = None
 
 stack = [('Program', None)]
@@ -133,7 +91,7 @@ while stack:
 
     error_node = False
     if label in non_terminals:
-        while (token_type not in table[label]) and token_type != '$':
+        while token_type not in table[label] and token_type != '$':
             print_error(token_line, "syntax error, illegal %s" % token_type)
             token_type, token_presentation, token_line = scanner.get_next_token()
         if token_type == '$' and token_type not in table[label]:
@@ -141,12 +99,11 @@ while stack:
             node.parent = None
             break
         elif table[label][token_type] == 'sync':
-            print_error(token_line, "missing %s" % label)
+            print_error(token_line, "syntax error, missing %s" % label)
             error_node = True
         else:
             for symbol in reversed(table[label][token_type]):
-                if symbol != EPSILON or len(table[label][token_type]) == 1:
-                    stack.append((symbol, node))
+                stack.append((symbol, node))
     else:
         if label == token_type:
             node.name = token_presentation
@@ -156,7 +113,6 @@ while stack:
             error_node = True
     if error_node:
         node.parent = None
-
 
 for pre, _, node in anytree.RenderTree(root):
     s = "%s%s\n" % (pre, node.name)
