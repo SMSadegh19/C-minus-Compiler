@@ -114,9 +114,7 @@ while stack:
     if error_node:
         node.parent = None
 
-for pre, _, node in anytree.RenderTree(root):
-    s = "%s%s\n" % (pre, node.name)
-    parse_tree_file.writelines(s)
+parse_tree_file.write(anytree.RenderTree(root).by_attr("name"))
 
 if not has_syntax_error:
     syntax_errors_file.write("There is no syntax error.")
