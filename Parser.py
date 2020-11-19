@@ -1,5 +1,5 @@
 import typing
-import anytree
+from anytree import Node, RenderTree
 from ScannerDFA import dfa
 from Scanner import Scanner
 
@@ -72,22 +72,17 @@ syntax_errors_file = open(file='syntax_errors.txt', mode='w')
 parse_tree_file = open(file='parse_tree.txt', mode='w', encoding='utf-8')
 
 
-root = None
+root = Node(name='Program', parent=None)
 
-stack = [('Program', None)]
+stack = [root]
+stack: typing.List[Node]
 
 while stack:
-    # print("entering node ", label, token_type, token_presentation)
-    # print(stack)
-    label, parent = stack.pop()
-    node = anytree.Node(label)
-    if parent:
-        node.parent = parent
+    node = stack.pop()
+    label = node.name
     if label == EPSILON:
         node.name = 'epsilon'
         continue
-    if label == "Program":
-        root = node
 
     error_node = False
     if label in non_terminals:
@@ -102,8 +97,11 @@ while stack:
             print_error(token_line, "syntax error, missing %s" % label)
             error_node = True
         else:
-            for symbol in reversed(table[label][token_type]):
-                stack.append((symbol, node))
+            children = []
+            for symbol in table[label][token_type]:
+                children.append(Node(name=symbol, parent=node))
+            for child in reversed(children):
+                stack.append(child)
     else:
         if label == token_type:
             node.name = token_presentation
@@ -114,7 +112,10 @@ while stack:
     if error_node:
         node.parent = None
 
-parse_tree_file.write(anytree.RenderTree(root).by_attr("name"))
+while stack:
+    stack.pop().parent = None
+
+parse_tree_file.write(RenderTree(root).by_attr("name"))
 
 if not has_syntax_error:
     syntax_errors_file.write("There is no syntax error.")
