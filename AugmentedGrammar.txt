@@ -1,0 +1,92 @@
+Program -> Declaration-list $
+Declaration-list -> Declaration Declaration-list
+Declaration-list -> ε
+Declaration -> Declaration-initial Declaration-prime
+Declaration-initial -> Type-specifier ID
+Declaration-prime -> Fun-declaration-prime
+Declaration-prime -> Var-declaration-prime
+Var-declaration-prime -> ;
+Var-declaration-prime -> [ NUM ] ;
+Fun-declaration-prime -> ( Params ) Compound-stmt
+Type-specifier -> int
+Type-specifier -> void
+Params -> int ID Param-prime Param-list
+Params -> void Param-list-void-abtar
+Param-list-void-abtar -> ID Param-prime Param-list
+Param-list-void-abtar -> ε
+Param-list -> , Param Param-list
+Param-list -> ε
+Param -> Declaration-initial Param-prime
+Param-prime -> [ ]
+Param-prime -> ε
+Compound-stmt -> { Declaration-list Statement-list }
+Statement-list -> Statement Statement-list
+Statement-list -> ε
+Statement -> Expression-stmt
+Statement -> Compound-stmt
+Statement -> Selection-stmt
+Statement -> Iteration-stmt
+Statement -> Return-stmt
+Statement -> Switch-stmt
+Expression-stmt -> Expression #pop ;
+Expression-stmt -> break ;
+Expression-stmt -> ;
+Selection-stmt -> if ( Expression #save ) Statement #jump_false_save else Statement #jump
+Iteration-stmt -> while ( #label Expression ) #save Statement #while
+Return-stmt -> return Return-stmt-prime
+Return-stmt-prime -> ;
+Return-stmt-prime -> Expression ;
+Switch-stmt -> switch ( Expression ) { Case-stmts Default-stmt }
+Case-stmts -> Case-stmt Case-stmts
+Case-stmts -> ε
+Case-stmt -> case NUM : Statement-list
+Default-stmt -> default : Statement-list
+Default-stmt -> ε
+Expression -> Simple-expression-zegond
+Expression -> ID #push_id B
+B -> = Expression #assign
+B -> [ Expression ] #array_access H
+B -> Simple-expression-prime
+H -> = Expression #assign
+H -> G D C
+Simple-expression-zegond -> Additive-expression-zegond C
+Simple-expression-prime -> Additive-expression-prime C
+C -> Relop Additive-expression #relop
+C -> ε
+Relop -> < #push_less_than_comparator
+Relop -> == #push_is_equal_operator
+Additive-expression -> Term D
+Additive-expression-prime -> Term-prime D
+Additive-expression-zegond -> Term-zegond D
+D -> Addop Term #add_or_subtract D
+D -> ε
+Addop -> + #push_addition_operator
+Addop -> - #push_subtraction_operator
+Term -> Signed-factor G
+Term-prime -> Signed-factor-prime G
+Term-zegond -> Signed-factor-zegond G
+G -> * Signed-factor #multiply G
+G -> ε
+Signed-factor -> + Factor
+Signed-factor -> - Factor #negate
+Signed-factor -> Factor
+Signed-factor-prime -> Factor-prime
+Signed-factor-zegond -> + Factor
+Signed-factor-zegond -> - Factor #negate
+Signed-factor-zegond -> Factor-zegond
+Factor -> ( Expression )
+Factor -> ID #push_id Var-call-prime
+Factor -> NUM #push_number
+Var-call-prime -> ( Args ) #function_call
+Var-call-prime -> Var-prime
+Var-prime -> [ Expression ] #array_access
+Var-prime -> ε
+Factor-prime -> ( Args ) #function_call
+Factor-prime -> ε
+Factor-zegond -> ( Expression )
+Factor-zegond -> NUM #push_number
+Args -> Arg-list
+Args -> ε
+Arg-list -> Expression Arg-list-prime
+Arg-list-prime -> , Expression Arg-list-prime
+Arg-list-prime -> ε

@@ -2,6 +2,8 @@ import typing
 from anytree import Node, RenderTree
 from ScannerDFA import dfa
 from Scanner import Scanner
+import re
+from CodeGenerator import generate_code
 
 non_terminals = set()
 grammars = set()
@@ -14,7 +16,7 @@ EPSILON = 'ε'
 firsts_file = open(file='Firsts.txt', mode='r', encoding='utf-8')
 follows_file = open(file='Follows.txt', mode='r', encoding='utf-8')
 predicts_file = open(file='Predicts.txt', mode='r', encoding='utf-8')
-grammar_file = open(file='grammar.txt', mode='r', encoding='utf-8')
+grammar_file = open(file='AugmentedGrammar.txt', mode='r', encoding='utf-8')
 
 lines = firsts_file.readlines()
 for line in lines:
@@ -64,8 +66,9 @@ def print_error(error_line: int, error_message: str):
     has_syntax_error = True
 
 
-source = open(file='input.txt', mode="r", encoding='utf-8')
+source = open(file='input.cpp', mode="r", encoding='utf-8')
 scanner = Scanner(dfa=dfa, source=source)
+last_token_type = None
 token_type, token_presentation, token_line = scanner.get_next_token()
 EOF_error = False
 syntax_errors_file = open(file='syntax_errors.txt', mode='w')
@@ -84,10 +87,17 @@ while stack:
         node.name = 'epsilon'
         continue
 
+    if re.match(r'#\w+', label):
+        generate_code(action=label, label=last_token_type)
+        last_token_type = token_presentation
+        node.parent = None
+        continue
+
     error_node = False
     if label in non_terminals:
         while token_type not in table[label] and token_type != '$':
-            print_error(token_line, "syntax error, illegal %s" % token_type)
+            print_error(token_line, "بذsyntax error, illegal %s" % token_type)
+            last_token_type = token_presentation
             token_type, token_presentation, token_line = scanner.get_next_token()
         if token_type == '$' and token_type not in table[label]:
             print_error(token_line, "syntax error, Unexpected EOF")
@@ -105,6 +115,7 @@ while stack:
     else:
         if label == token_type:
             node.name = token_presentation
+            last_token_type = token_presentation
             token_type, token_presentation, token_line = scanner.get_next_token()
         else:
             print_error(token_line, "syntax error, missing %s" % label)
@@ -119,3 +130,9 @@ parse_tree_file.write(RenderTree(root).by_attr("name"))
 
 if not has_syntax_error:
     syntax_errors_file.write("There is no syntax error.")
+
+
+from CodeGenerator import program_block
+
+for line_number, line in program_block.items():
+    print("%s: %s" % (line_number, line))
