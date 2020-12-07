@@ -29,18 +29,18 @@ Statement -> Iteration-stmt
 Statement -> Return-stmt
 Statement -> Switch-stmt
 Expression-stmt -> Expression #pop ;
-Expression-stmt -> break ;
+Expression-stmt -> break #break ;
 Expression-stmt -> ;
 Selection-stmt -> if ( Expression #save ) Statement #jump_false_save else Statement #jump
 Iteration-stmt -> while ( #label Expression ) #save Statement #while
 Return-stmt -> return Return-stmt-prime
 Return-stmt-prime -> ;
 Return-stmt-prime -> Expression ;
-Switch-stmt -> switch ( Expression ) { Case-stmts Default-stmt }
+Switch-stmt -> switch #start_switch #start_scope ( Expression ) { Case-stmts Default-stmt } #end_switch #end_scope
 Case-stmts -> Case-stmt Case-stmts
 Case-stmts -> ε
-Case-stmt -> case NUM : Statement-list
-Default-stmt -> default : Statement-list
+Case-stmt -> case NUM #push_number #case : Statement-list #end_case
+Default-stmt -> default #save : Statement-list #check_default
 Default-stmt -> ε
 Expression -> Simple-expression-zegond
 Expression -> ID #push_id B
