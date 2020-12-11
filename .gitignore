@@ -1,4 +1,4 @@
 .vscode/settings.json
 __pycache__/Scanner.cpython-36.pyc
-.gitignore
 checknevis.txt
+/.idea/
