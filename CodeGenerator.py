@@ -53,10 +53,10 @@ def generate_code(*, action: str, label: str):
         semantic_stack.append(temp_address)
     elif action == "#assign":
         # print("         ", semantic_stack)
-        first_operand_address = semantic_stack[-2]
-        second_operand_address = semantic_stack[-1]
+        destination = semantic_stack[-2]
+        source = semantic_stack[-1]
         semantic_stack.pop()
-        write_to_program_block(code="(ASSIGN, %s, %s, )" % (first_operand_address, second_operand_address))
+        write_to_program_block(code="(ASSIGN, %s, %s, )" % (source, destination))
     elif action == '#pop':
         print("popping from semantic stack", semantic_stack)
         semantic_stack.pop()
