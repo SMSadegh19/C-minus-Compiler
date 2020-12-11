@@ -40,7 +40,7 @@ def generate_code(*, action: str, label: str):
         b = m.group(2)
         # print(a, b)
         temp_address = symbol_table.get_temp()
-        write_to_program_block(code="(ASSIGN, %d, #%s, )" % (temp_address, b))
+        write_to_program_block(code="(ASSIGN, #%s, %d, )" % (b, temp_address))
         semantic_stack.append(temp_address)
     elif action == '#multiply':
         first_operand_address = semantic_stack[-1]

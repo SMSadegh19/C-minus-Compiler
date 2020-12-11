@@ -96,7 +96,7 @@ while stack:
     error_node = False
     if label in non_terminals:
         while token_type not in table[label] and token_type != '$':
-            print_error(token_line, "بذsyntax error, illegal %s" % token_type)
+            print_error(token_line, "syntax error, illegal %s" % token_type)
             last_token_type = token_presentation
             token_type, token_presentation, token_line = scanner.get_next_token()
         if token_type == '$' and token_type not in table[label]:
