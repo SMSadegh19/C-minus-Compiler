@@ -129,15 +129,19 @@ def generate_code(*, action: str, label: str):
         semantic_stack.append(result_address)
     elif action == '#push_type':
         print()
+        # var_type = re.match(r'\((\w+), (\w+)\)', label).group(2)
+        # semantic_stack.append(var_type)
+        # print('var_type is:', var_type)
     elif action == '#variable_definition':
         print()
     elif action == '#array_definition':
         print()
     elif action == '#function_call':
-        #TODO for phase 4: must change
-        print("fc")
+        # TODO for phase 4: must change. now it is just for output
+        write_to_program_block(code="(PRINT, %s, , )" % semantic_stack[-1])
+        semantic_stack.pop()
     elif action == '#array_access':
-        #TODO
+        # TODO
         print('ac')
 
 
@@ -145,7 +149,7 @@ def generate_code(*, action: str, label: str):
 
 
 
-    # rottennnnnnnnnn
+    # rottenness
     # this part is rotten!!!!!!!!
 
     elif action == '#start_switch':
