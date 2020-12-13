@@ -67,7 +67,7 @@ def print_error(error_line: int, error_message: str):
     has_syntax_error = True
 
 
-source = open(file='input.cpp', mode="r", encoding='utf-8')
+source = open(file='input.txt', mode="r", encoding='utf-8')
 scanner = Scanner(dfa=dfa, source=source)
 last_token_type = None
 token_type, token_presentation, token_line = scanner.get_next_token()
@@ -131,8 +131,8 @@ parse_tree_file.write(RenderTree(root).by_attr("name"))
 if not has_syntax_error:
     syntax_errors_file.write("There is no syntax error.")
 
-output_file = open(file='output.txt', mode='r', encoding='utf-8')
+output_file = open(file='output.txt', mode='w', encoding='utf-8')
 
 for line_number, code in program_block.items():
-    print("%s: %s" % (line_number, code))
-    output_file.write("%s\t%s" % (line_number, code))
+    print("%s\t%s" % (line_number, code))
+    output_file.write("%s\t%s\n" % (line_number, code))
