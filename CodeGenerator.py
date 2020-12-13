@@ -127,6 +127,23 @@ def generate_code(*, action: str, label: str):
             code="(MULT, %s, #-1, %s)" % (first_operand_address, result_address))
         semantic_stack.pop()
         semantic_stack.append(result_address)
+    elif action == '#push_type':
+        print()
+    elif action == '#variable_definition':
+        print()
+    elif action == '#array_definition':
+        print()
+    elif action == '#function_call':
+        #TODO for phase 4: must change
+        print("fc")
+    elif action == '#array_access':
+        #TODO
+        print('ac')
+
+
+
+
+
 
     # rottennnnnnnnnn
     # this part is rotten!!!!!!!!
