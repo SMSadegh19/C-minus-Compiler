@@ -4,6 +4,7 @@ from ScannerDFA import dfa
 from Scanner import Scanner
 import re
 from CodeGenerator import generate_code
+from CodeGenerator import program_block
 
 non_terminals = set()
 grammars = set()
@@ -74,7 +75,6 @@ EOF_error = False
 syntax_errors_file = open(file='syntax_errors.txt', mode='w')
 parse_tree_file = open(file='parse_tree.txt', mode='w', encoding='utf-8')
 
-
 root = Node(name='Program', parent=None)
 
 stack = [root]
@@ -131,8 +131,8 @@ parse_tree_file.write(RenderTree(root).by_attr("name"))
 if not has_syntax_error:
     syntax_errors_file.write("There is no syntax error.")
 
+output_file = open(file='output.txt', mode='r', encoding='utf-8')
 
-from CodeGenerator import program_block
-
-for line_number, line in program_block.items():
-    print("%s: %s" % (line_number, line))
+for line_number, code in program_block.items():
+    print("%s: %s" % (line_number, code))
+    output_file.write("%s\t%s" % (line_number, code))
