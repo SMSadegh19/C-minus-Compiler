@@ -135,7 +135,8 @@ def generate_code(*, action: str, label: str):
     elif action == '#variable_definition':
         print()
     elif action == '#array_definition':
-        print()
+        arr_size = int(re.match(r'\((\w+), (\w+)\)', label).group(2))
+        symbol_table.extend(arr_size - 1)
     elif action == '#function_call':
         # TODO for phase 4: must change. now it is just for output
         write_to_program_block(code="(PRINT, %s, , )" % semantic_stack[-1])

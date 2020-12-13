@@ -20,4 +20,6 @@ class SymbolTable:
         self.temp_register_index += self.byte_length
         return result
 
+    def extend(self, number_of_index_to_extend):
+        self.symbol_register_index += self.byte_length * number_of_index_to_extend
 
