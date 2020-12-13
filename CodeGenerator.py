@@ -147,8 +147,10 @@ def generate_code(*, action: str, label: str):
     elif action == '#array_access':
         array_address = semantic_stack[-2]
         index_address = semantic_stack[-1]
+        index_mul4_address = symbol_table.get_temp()
         result_address = symbol_table.get_temp()
-        write_to_program_block(code="(ADD, #%s, %s, %s)" % (array_address, index_address, result_address))
+        write_to_program_block(code="(MULT, #%s, %s, %s)" % (symbol_table.byte_length, index_address, index_mul4_address))
+        write_to_program_block(code="(ADD, #%s, %s, %s)" % (array_address, index_mul4_address, result_address))
         semantic_stack.pop()
         semantic_stack.pop()
         semantic_stack.append("@" + str(result_address))
