@@ -2,11 +2,11 @@ Program -> Declaration-list $
 Declaration-list -> Declaration Declaration-list
 Declaration-list -> ε
 Declaration -> Declaration-initial Declaration-prime
-Declaration-initial -> Type-specifier #push_type ID
+Declaration-initial -> Type-specifier #push_type ID #define_var
 Declaration-prime -> Fun-declaration-prime
 Declaration-prime -> Var-declaration-prime
 Var-declaration-prime -> #variable_definition ;
-Var-declaration-prime -> [ NUM #array_definition ] ;
+Var-declaration-prime -> [ NUM #array_extend ] ;
 Fun-declaration-prime -> ( Params ) Compound-stmt
 Type-specifier -> int
 Type-specifier -> void

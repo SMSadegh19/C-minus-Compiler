@@ -134,7 +134,10 @@ def generate_code(*, action: str, label: str):
         # print('var_type is:', var_type)
     elif action == '#variable_definition':
         print()
-    elif action == '#array_definition':
+    elif action == '#define_var':
+        var_name = re.match(r'\((\w+), (\w+)\)', label).group(2)
+        symbol_table.get_symbol(var_name)
+    elif action == '#array_extend':
         arr_size = int(re.match(r'\((\w+), (\w+)\)', label).group(2))
         symbol_table.extend(arr_size - 1)
     elif action == '#function_call':
@@ -142,8 +145,13 @@ def generate_code(*, action: str, label: str):
         write_to_program_block(code="(PRINT, %s, , )" % semantic_stack[-1])
         semantic_stack.pop()
     elif action == '#array_access':
-        # TODO
-        print('ac')
+        array_address = semantic_stack[-2]
+        index_address = semantic_stack[-1]
+        result_address = symbol_table.get_temp()
+        write_to_program_block(code="(ADD, #%s, %s, %s)" % (array_address, index_address, result_address))
+        semantic_stack.pop()
+        semantic_stack.pop()
+        semantic_stack.append("@" + str(result_address))
 
 
 

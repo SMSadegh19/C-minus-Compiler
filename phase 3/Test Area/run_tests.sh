@@ -5,8 +5,8 @@ echo "" > brief_results.txt
 for dir in ../PA3_Resources/*; do
     cp "${dir}/input.txt" ./input.txt
     echo "${dir}"
-    python3 ../../Parser.py
-    wine tester_Windows.exe
+    python3 ../../compiler.py
+    wine tester_Windows.exe > expected.txt
     printf "\n\n\n\n=====================================>>>>> Running Test ${dir}...\n" >> log.txt
     printf "\n\n=====================================>>>>> Running Test ${dir}...\n" >> brief_results.txt
     printf "\n\n              *** output.txt diffrences ***\n" >> log.txt
