@@ -2,7 +2,7 @@
 
 echo "" > log.txt
 echo "" > brief_results.txt
-for dir in ../PA3_Resources/*; do
+for dir in ../PA3_input_output_samples/*; do
     cp "${dir}/input.txt" ./input.txt
     echo "${dir}"
     python3 ../../compiler.py

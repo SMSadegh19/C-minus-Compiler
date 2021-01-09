@@ -81,4 +81,9 @@ class NewSymbolTable:
         self.globals_index += self.byte_length
         return address
 
+    def allocate_array_memory(self, array_size: int):
+        allocation_address = self.globals_index
+        self.globals_index += self.byte_length * array_size
+        return allocation_address
+
 

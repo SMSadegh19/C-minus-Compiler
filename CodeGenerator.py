@@ -12,7 +12,6 @@ program_block_counter = 0
 
 def write_to_program_block(*, code: str):
     global program_block_counter
-    print("line: ", code)
     program_block[program_block_counter] = code
     program_block_counter += 1
 
@@ -68,26 +67,21 @@ def get_pointer_by_relative_address(relative_address: int):
     return "@" + str(temp)
 
 
+def at_at_to_at(pointer: str):
+    temp = new_symbol_table.get_simple_temp()
+    write_to_program_block(code="(ASSIGN, %s, %s, )" % (pointer, temp))
+    return '@' + str(temp)
+
+
 def get_symbol_address(symbol, real_address: bool = True):
     if symbol.type == 'function':
         raise Exception('extracting address from function')
     if symbol.addressing_type == 'global':
-        if symbol.var_type == 'int':
-            return symbol.address
-        elif symbol.var_type == 'pointer':
-            pass  # todo: array
-        else:
-            pass  # todo: maybe raise an exception
+        return symbol.address
     elif symbol.addressing_type == 'relative':
-        if symbol.var_type == 'int':
-            return get_by_relative_address(symbol.address)
-        elif symbol.var_type == 'pointer':
-            if real_address:
-                return get_pointer_by_relative_address(symbol.address)
-            else:
-                return get_by_relative_address(symbol.address)
-        else:
-            pass  # todo: maybe raise an exception
+        return get_by_relative_address(symbol.address)
+    elif symbol.addressing_type == 'relative pointer':
+        return at_at_to_at(get_by_relative_address(symbol.address))
     else:
         raise Exception("hendelll")
 
@@ -191,8 +185,9 @@ def new_generate_code(*, action: str, label: str):
             input_type = args[i]
             input_lexeme = args[i + 1]
             is_array = args[i + 2]
+            var_type = input_type + ('*' if is_array == 'array' else '')
             new_symbol_table.define_symbol(
-                Symbol(lexeme=input_lexeme, var_type=input_type, addressing_type='relative',
+                Symbol(lexeme=input_lexeme, var_type=var_type, addressing_type='relative',
                        address=function_memory[-1].frame_size,
                        scope=scope_stack[-1], symbol_type='variable')
             )
@@ -265,12 +260,15 @@ def new_generate_code(*, action: str, label: str):
         if length <= 0:
             raise Exception('length of arrays must be at least one ')
         if len(function_memory) <= 0:
-            raise Exception("add global array")
-            # symbol = Symbol(lexeme=var_name, var_type='pointer', addressing_type='global',
-            #                 address=new_symbol_table.get_new_global_address(), )
+            array_pointer_address = new_symbol_table.get_new_global_address()
+            allocation_address =new_symbol_table.allocate_array_memory(length)
+            write_to_program_block(code="(ASSIGN, #%s, %s, )" % (allocation_address, array_pointer_address))
+            symbol = Symbol(lexeme=var_name, var_type=(var_type + '*'), addressing_type='global',
+                            address=array_pointer_address, scope=scope_stack[-1], symbol_type='variable')
         else:
-            symbol = Symbol(lexeme=var_name, var_type='pointer', addressing_type='relative',
+            symbol = Symbol(lexeme=var_name, var_type=(var_type + "*"), addressing_type='relative',
                             address=function_memory[-1].frame_size, scope=scope_stack[-1], symbol_type='variable')
+            print("defining array:", symbol.var_type, symbol.addressing_type)
             pointer_address = get_by_relative_address(function_memory[-1].frame_size)
             function_memory[-1].frame_size += 4
             array_beginning_address = get_by_relative_address(function_memory[-1].frame_size)
@@ -279,18 +277,26 @@ def new_generate_code(*, action: str, label: str):
         new_symbol_table.define_symbol(symbol)
 
     elif action == '#array_access':
-        array_pointer = get_symbol_address(semantic_stack[-2], real_address=False)
-        offset = get_symbol_address(semantic_stack[-1])
+        array_symbol = semantic_stack[-2]
+        if array_symbol.var_type != 'int*':
+            print(array_symbol.var_type, array_symbol.lexeme)
+            raise Exception("accessing a non array variable as an array")
+        offset_symbol = semantic_stack[-1]
+        if offset_symbol.var_type != 'int':
+            raise Exception("offset symbol is not of type int")
+
+        array_pointer = get_symbol_address(array_symbol)
+        offset = get_symbol_address(offset_symbol)
         semantic_stack.pop()
         semantic_stack.pop()
+        relative_address = function_memory[-1].frame_size
+        temp_address = get_by_relative_address(relative_address)
         semantic_stack.append(
-            Symbol(lexeme="", var_type='pointer', addressing_type='relative',
+            Symbol(lexeme="", var_type='int', addressing_type='relative pointer',
                    address=function_memory[-1].frame_size, scope=-1, symbol_type='variable')
         )
         function_memory[-1].frame_size += 4
-        final_address = get_symbol_address(semantic_stack[-1], real_address=False)
-        write_to_program_block(code="(ADD, %s, %s, %s)" % (array_pointer, offset, final_address))
-
+        write_to_program_block(code="(ADD, %s, %s, %s)" % (array_pointer, offset, temp_address))
 
     elif action == '#push_number':
         num = re.match(r'\((\w+), (\d+)\)', label).group(2)
