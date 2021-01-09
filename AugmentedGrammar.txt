@@ -2,23 +2,23 @@ Program -> Declaration-list $
 Declaration-list -> Declaration Declaration-list
 Declaration-list -> ε
 Declaration -> Declaration-initial Declaration-prime
-Declaration-initial -> Type-specifier #push_type ID #define_var
-Declaration-prime -> Fun-declaration-prime
+Declaration-initial -> Type-specifier #push_type ID #push
+Declaration-prime -> #start_function Fun-declaration-prime
 Declaration-prime -> Var-declaration-prime
 Var-declaration-prime -> #variable_definition ;
-Var-declaration-prime -> [ NUM #array_extend ] ;
-Fun-declaration-prime -> ( Params ) Compound-stmt
+Var-declaration-prime -> [ NUM #push #define_array ] ;
+Fun-declaration-prime -> ( Params ) #define_function Compound-stmt #END_SCOPE #end_function
 Type-specifier -> int
 Type-specifier -> void
-Params -> int ID Param-prime Param-list
+Params -> int #push ID #push Param-prime #add_param Param-list
 Params -> void Param-list-void-abtar
 Param-list-void-abtar -> ID Param-prime Param-list
 Param-list-void-abtar -> ε
 Param-list -> , Param Param-list
 Param-list -> ε
-Param -> Declaration-initial Param-prime
-Param-prime -> [ ]
-Param-prime -> ε
+Param -> Declaration-initial Param-prime #add_param
+Param-prime -> [ ] #push_array_input_type
+Param-prime -> ε #push_normal_input_type
 Compound-stmt -> { Declaration-list Statement-list }
 Statement-list -> Statement Statement-list
 Statement-list -> ε
@@ -31,11 +31,11 @@ Statement -> Switch-stmt
 Expression-stmt -> Expression #pop ;
 Expression-stmt -> break #break ;
 Expression-stmt -> ;
-Selection-stmt -> if ( Expression #save ) Statement #jump_false_save else Statement #jump
-Iteration-stmt -> while ( #label Expression ) #save Statement #while
+Selection-stmt -> if ( Expression #if ) Statement else #else Statement #endif
+Iteration-stmt -> while ( #save_line Expression ) #while Statement #endwhile
 Return-stmt -> return Return-stmt-prime
-Return-stmt-prime -> ;
-Return-stmt-prime -> Expression ;
+Return-stmt-prime -> #return ;
+Return-stmt-prime -> Expression #return_value ;
 Switch-stmt -> switch #start_switch #start_scope ( Expression ) { Case-stmts Default-stmt } #end_switch #end_scope
 Case-stmts -> Case-stmt Case-stmts
 Case-stmts -> ε
@@ -77,11 +77,11 @@ Signed-factor-zegond -> Factor-zegond
 Factor -> ( Expression )
 Factor -> ID #push_id Var-call-prime
 Factor -> NUM #push_number
-Var-call-prime -> ( Args ) #function_call
+Var-call-prime -> #start_function_call ( Args ) #function_call
 Var-call-prime -> Var-prime
 Var-prime -> [ Expression ] #array_access
 Var-prime -> ε
-Factor-prime -> ( Args ) #function_call
+Factor-prime -> #start_function_call ( Args ) #function_call
 Factor-prime -> ε
 Factor-zegond -> ( Expression )
 Factor-zegond -> NUM #push_number
