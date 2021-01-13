@@ -264,7 +264,7 @@ def new_generate_code(*, action: str, label: str):
             raise Exception('length of arrays must be at least one ')
         if len(function_memory) <= 0:
             array_pointer_address = new_symbol_table.get_new_global_address()
-            allocation_address =new_symbol_table.allocate_array_memory(length)
+            allocation_address = new_symbol_table.allocate_array_memory(length)
             write_to_program_block(code="(ASSIGN, #%s, %s, )" % (allocation_address, array_pointer_address))
             symbol = Symbol(lexeme=var_name, var_type=(var_type + '*'), addressing_type='global',
                             address=array_pointer_address, scope=scope_stack[-1], symbol_type='variable')
@@ -403,15 +403,41 @@ def new_generate_code(*, action: str, label: str):
         edit_program_line(while_condition_line, str(program_block_counter))
         edit_program_line(jump_out_line, str(program_block_counter))
         while_switch_scope_stack.pop()
+    elif action == '#start_switch':
+        while_switch_scope_stack.append(ScopeEntry("switch", len(semantic_stack)))
+        # next 3 lines is for jump out of stack (for break)
+        write_to_program_block(code="(JP, %s, , )" % (program_block_counter + 2))
+        semantic_stack.append(program_block_counter)
+        write_to_program_block(code="(JP, ?, , )")
+    elif action == '#start_case':
+        case_value_address = get_symbol_address(semantic_stack[-1])
+        switch_value_address = get_symbol_address(semantic_stack[-2])
+        semantic_stack.pop()
+        comparison_result_address = new_symbol_table.get_simple_temp()
+        write_to_program_block(
+            code="(EQ, %s, %s, %s)" % (case_value_address, switch_value_address, comparison_result_address))
+        semantic_stack.append(program_block_counter)
+        write_to_program_block(code="(JPF, %s, ?, )" % comparison_result_address)
+    elif action == '#end_case':
+        case_jump_condition_line = semantic_stack[-1]
+        semantic_stack.pop()
+        edit_program_line(case_jump_condition_line, str(program_block_counter))
+    elif action == '#end_switch':
+        switch_jump_out_line = semantic_stack[-2]
+        semantic_stack.pop()
+        semantic_stack.pop()
+        edit_program_line(switch_jump_out_line, str(program_block_counter))
     elif action == '#break':
+        # TODO semantic check of break
         last_scope = while_switch_scope_stack[-1]
         if last_scope.scope_type == "while":
             semantic_stack_scope_index = last_scope.semantic_stack_start_index
             jump_out_line = semantic_stack[semantic_stack_scope_index]
             write_to_program_block(code="(JP, %s, , )" % jump_out_line)
         elif last_scope.scope_type == "switch":
-            # TODO for switch block
-            print()
+            semantic_stack_scope_index = last_scope.semantic_stack_start_index
+            jump_out_line = semantic_stack[semantic_stack_scope_index]
+            write_to_program_block(code="(JP, %s, , )" % jump_out_line)
     #
     # elif action == '#save':
     #     semantic_stack.append(program_block_counter)

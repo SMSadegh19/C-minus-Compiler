@@ -36,11 +36,11 @@ Iteration-stmt -> while ( #start_while Expression ) #while_condition Statement #
 Return-stmt -> return Return-stmt-prime
 Return-stmt-prime -> #return ;
 Return-stmt-prime -> Expression #return_value ;
-Switch-stmt -> switch #start_switch #start_scope ( Expression ) { Case-stmts Default-stmt } #end_switch #end_scope
+Switch-stmt -> switch #start_switch ( Expression ) { Case-stmts Default-stmt } #end_switch
 Case-stmts -> Case-stmt Case-stmts
 Case-stmts -> ε
-Case-stmt -> case NUM #push_number #case : Statement-list #end_case
-Default-stmt -> default #save : Statement-list #check_default
+Case-stmt -> case NUM #push_number #start_case : Statement-list #end_case
+Default-stmt -> default : Statement-list
 Default-stmt -> ε
 Expression -> Simple-expression-zegond
 Expression -> ID #push_id B
