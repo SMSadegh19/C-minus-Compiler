@@ -32,7 +32,7 @@ Expression-stmt -> Expression #pop ;
 Expression-stmt -> break #break ;
 Expression-stmt -> ;
 Selection-stmt -> if ( Expression #if ) Statement else #else Statement #endif
-Iteration-stmt -> while ( #save_line Expression ) #while Statement #endwhile
+Iteration-stmt -> while ( #start_while Expression ) #while_condition Statement #endwhile
 Return-stmt -> return Return-stmt-prime
 Return-stmt-prime -> #return ;
 Return-stmt-prime -> Expression #return_value ;

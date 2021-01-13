@@ -1,10 +1,13 @@
 import typing
 import re
 from SymbolTable import *
+from ScopeHandler import ScopeEntry
 
 symbol_table = SymbolTable()
 
 semantic_stack = []
+while_switch_scope_stack = []
+while_switch_scope_stack: typing.List[ScopeEntry]
 
 program_block = {}
 program_block_counter = 0
@@ -373,9 +376,17 @@ def new_generate_code(*, action: str, label: str):
         if_body_jump_line = semantic_stack[-1]
         semantic_stack.pop()
         edit_program_line(line=if_body_jump_line, replacement=str(program_block_counter))
-    elif action == '#save_line':
+    elif action == '#start_while':
+        while_switch_scope_stack.append(ScopeEntry("while", len(semantic_stack)))
+        # next 3 lines are for break statement
+        # jump to start of while:
+        write_to_program_block(code="(JP, %s, , )" % (program_block_counter + 2))
+        # jump to after of while:
         semantic_stack.append(program_block_counter)
-    elif action == '#while':
+        write_to_program_block(code="(JP, ?, , )")
+        # put start of while Expression computing in the stack
+        semantic_stack.append(program_block_counter)
+    elif action == '#while_condition':
         comparison_result_address = get_symbol_address(semantic_stack[-1])
         semantic_stack.pop()
         write_to_program_block(code="(JPF, %s, ?, )" % comparison_result_address)
@@ -383,10 +394,24 @@ def new_generate_code(*, action: str, label: str):
     elif action == '#endwhile':
         while_condition_line = semantic_stack[-1]
         while_expression_beginning_line = semantic_stack[-2]
+        # break jumps here to get out of while:
+        jump_out_line = semantic_stack[-3]
+        semantic_stack.pop()
         semantic_stack.pop()
         semantic_stack.pop()
         write_to_program_block(code="(JP, %s, , )" % while_expression_beginning_line)
         edit_program_line(while_condition_line, str(program_block_counter))
+        edit_program_line(jump_out_line, str(program_block_counter))
+        while_switch_scope_stack.pop()
+    elif action == '#break':
+        last_scope = while_switch_scope_stack[-1]
+        if last_scope.scope_type == "while":
+            semantic_stack_scope_index = last_scope.semantic_stack_start_index
+            jump_out_line = semantic_stack[semantic_stack_scope_index]
+            write_to_program_block(code="(JP, %s, , )" % jump_out_line)
+        elif last_scope.scope_type == "switch":
+            # TODO for switch block
+            print()
     #
     # elif action == '#save':
     #     semantic_stack.append(program_block_counter)
