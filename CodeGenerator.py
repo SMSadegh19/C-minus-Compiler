@@ -427,6 +427,7 @@ def new_generate_code(*, action: str, label: str):
         semantic_stack.pop()
         semantic_stack.pop()
         edit_program_line(switch_jump_out_line, str(program_block_counter))
+        while_switch_scope_stack.pop()
     elif action == '#break':
         # TODO semantic check of break
         last_scope = while_switch_scope_stack[-1]
