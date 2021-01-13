@@ -2,6 +2,7 @@ from ScannerDFA import DFA
 
 
 KEYWORDS = ['if', 'else', 'void', 'int', 'while', 'break', 'switch', 'default', 'case', 'return']
+program_line = 0
 
 
 class Scanner:
@@ -21,6 +22,8 @@ class Scanner:
 
     def _get_next_token(self):
         self.dfa.init_traversal(1)
+        global program_line
+        program_line = self._current_line
         token_line = self._current_line
         while True:
             char = self._get_next_character() if not self._refeed else self._last_character

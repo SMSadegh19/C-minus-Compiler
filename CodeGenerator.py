@@ -2,6 +2,7 @@ import typing
 import re
 from SymbolTable import *
 from ScopeHandler import ScopeEntry
+from SemanticChecker import semantic_check
 
 symbol_table = SymbolTable()
 
@@ -77,6 +78,8 @@ def at_at_to_at(pointer: str):
 
 
 def get_symbol_address(symbol, real_address: bool = True):
+    if symbol is None:
+        return None
     if symbol.type == 'function':
         raise Exception('extracting address from function')
     if symbol.addressing_type == 'global':
@@ -90,6 +93,9 @@ def get_symbol_address(symbol, real_address: bool = True):
 
 
 def function_call(function_symbol: Symbol, args: list):
+    if function_symbol is None:
+        semantic_stack.append(None)
+        return
     print("calling function", function_symbol.lexeme, "with args:", args)
     if function_symbol.lexeme == 'output':
         write_to_program_block(code="(PRINT, %s, , )" % get_symbol_address(args[0]))
@@ -311,9 +317,13 @@ def new_generate_code(*, action: str, label: str):
     elif action == '#push_id':
         identifier = re.match(r'\((\w+), (\w+)\)', label).group(2)
         print(identifier)
-        symbol = new_symbol_table.get_symbol(identifier)
-        semantic_stack.append(symbol)
-        print("appending symbol", symbol.lexeme, symbol.addressing_type, symbol.address)
+        try:
+            symbol = new_symbol_table.get_symbol(identifier)
+            semantic_stack.append(symbol)
+            print("appending symbol", symbol.lexeme, symbol.addressing_type, symbol.address)
+        except:
+            semantic_check(check_error='undefined', p1=identifier)
+            semantic_stack.append(None)
         # semantic_stack.append(convert_symbol(symbol))
         # todo: check when symbol does not exist
     elif action == '#multiply':
@@ -430,12 +440,10 @@ def new_generate_code(*, action: str, label: str):
         while_switch_scope_stack.pop()
     elif action == '#break':
         # TODO semantic check of break
-        last_scope = while_switch_scope_stack[-1]
-        if last_scope.scope_type == "while":
-            semantic_stack_scope_index = last_scope.semantic_stack_start_index
-            jump_out_line = semantic_stack[semantic_stack_scope_index]
-            write_to_program_block(code="(JP, %s, , )" % jump_out_line)
-        elif last_scope.scope_type == "switch":
+        if len(while_switch_scope_stack) == 0:
+            semantic_check(check_error="break")
+        else:
+            last_scope = while_switch_scope_stack[-1]
             semantic_stack_scope_index = last_scope.semantic_stack_start_index
             jump_out_line = semantic_stack[semantic_stack_scope_index]
             write_to_program_block(code="(JP, %s, , )" % jump_out_line)

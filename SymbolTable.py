@@ -1,4 +1,5 @@
 import typing
+from SemanticChecker import semantic_check
 
 
 class SymbolTable:
@@ -85,5 +86,3 @@ class NewSymbolTable:
         allocation_address = self.globals_index
         self.globals_index += self.byte_length * array_size
         return allocation_address
-
-
