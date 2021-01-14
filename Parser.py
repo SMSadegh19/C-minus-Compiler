@@ -134,10 +134,9 @@ if not has_syntax_error:
 
 output_file = open(file='output.txt', mode='w', encoding='utf-8')
 
-# if SemanticChecker.has_semantic_error:
-#     output_file.write("The code has not been generated.")
-#     print("The code has not been generated.")
-# else:
-for line_number, code in program_block.items():
-    print("%s\t%s" % (line_number, code))
-    output_file.write("%s\t%s\n" % (line_number, code))
+if SemanticChecker.has_semantic_error:
+    output_file.write("The code has not been generated.")
+else:
+    for line_number, code in program_block.items():
+        print("%s\t%s" % (line_number, code))
+        output_file.write("%s\t%s\n" % (line_number, code))

@@ -1,5 +1,4 @@
 import typing
-from SemanticChecker import semantic_check
 
 
 class SymbolTable:
