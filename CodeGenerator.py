@@ -125,6 +125,10 @@ def function_call(function_symbol: Symbol, args: list):
     # todo: check number of args match
     # todo: check args type match signature of function
     for i, arg in enumerate(args):
+        if function_signature[function_symbol.lexeme][3 * i + 2] == 'array' and arg.var_type == 'int':
+            semantic_check(check_error='argument_type', p1=i+1, p2=function_symbol.lexeme, p3='array', p4='int')
+        elif function_signature[function_symbol.lexeme][3 * i + 2] != 'array' and arg.var_type == 'int*':
+            semantic_check(check_error='argument_type', p1=i+1, p2=function_symbol.lexeme, p3='int', p4='array')
         arg_address_pointer = new_symbol_table.get_simple_temp()
         write_to_program_block(
             code="(ADD, %s, #%s, %s)" % (

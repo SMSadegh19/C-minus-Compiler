@@ -23,7 +23,6 @@ def semantic_check(*, check_error, p1='', p2='', p3='', p4=''):
     elif check_error == 'type_operation':
         semantic_errors_file.write("Type mismatch in operands, Got %s instead of %s.\n" % (p1, p2))
     elif check_error == 'argument_type':
-        # todo 6
         semantic_errors_file.write(
             "Mismatch in type of argument %s of \'%s\'. Expected \'%s\' but got \'%s\' instead.\n" % (p1, p2, p3, p4))
 
