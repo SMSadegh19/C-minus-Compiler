@@ -43,6 +43,11 @@ function_signature = dict()
 write_to_program_block(code="(ASSIGN, #%s, %s, )" % (500, new_symbol_table.stack_pointer))
 write_to_program_block(code="(ASSIGN, #0, %s, )" % new_symbol_table.return_value_address_pointer)
 
+new_symbol_table.define_symbol(
+    Symbol(lexeme='output', var_type='void', addressing_type="nothing",
+           address=0, symbol_type='function', scope=0,
+           arguments_count=1))
+
 
 # class SemanticEntry:
 #
@@ -94,6 +99,11 @@ def get_symbol_address(symbol, real_address: bool = True):
 
 def function_call(function_symbol: Symbol, args: list):
     if function_symbol is None:
+        semantic_stack.append(None)
+        return
+    print("len called args:", len(args), "len function signature:", function_symbol.arguments_count)
+    if len(args) != function_symbol.arguments_count:
+        semantic_check(check_error='arguments_count', p1=function_symbol.lexeme)
         semantic_stack.append(None)
         return
     print("calling function", function_symbol.lexeme, "with args:", args)
@@ -156,6 +166,7 @@ def new_generate_code(*, action: str, label: str):
     global scope_counter
     if action == '#push_type':
         def_type = re.match(r'\((\w+), (\w+)\)', label).group(2)
+        print("this is my type!!!:", def_type)
         semantic_stack.append(def_type)
     elif action == '#push_array_input_type':
         semantic_stack.append("array")
@@ -176,12 +187,14 @@ def new_generate_code(*, action: str, label: str):
         ss = list(reversed(ss))
         function_type = ss[0]
         function_name = ss[1]
+        args_count = (len(ss) - 2) // 3
         if function_name != 'main':
             write_to_program_block(code="(JP, ?, , )")
             semantic_stack.append(program_block_counter - 1)
         new_symbol_table.define_symbol(
             Symbol(lexeme=function_name, var_type=function_type, addressing_type="code_line",
-                   address=program_block_counter, symbol_type='function', scope=scope_stack[-1]))
+                   address=program_block_counter, symbol_type='function', scope=scope_stack[-1],
+                   arguments_count=args_count))
         scope_counter += 1
         scope_stack.append(scope_counter)
         function_memory.append(FunctionEntry(frame_size=8,
@@ -244,6 +257,9 @@ def new_generate_code(*, action: str, label: str):
         var_name = semantic_stack[-1]
         semantic_stack.pop()
         semantic_stack.pop()
+        if var_type == 'void':
+            semantic_check(check_error='void_var', p1=var_name)
+            return
         # todo : check for existence of this same variable in the current scope (semantic error)
         if len(function_memory) <= 0:
             symbol = Symbol(lexeme=var_name, var_type='int', addressing_type='global',
@@ -265,7 +281,8 @@ def new_generate_code(*, action: str, label: str):
         semantic_stack.pop()
         semantic_stack.pop()
         if var_type == 'void':
-            raise Exception('can\'t define array of void')
+            semantic_check(check_error='void_var', p1=var_name)
+            return
         if length <= 0:
             raise Exception('length of arrays must be at least one ')
         if len(function_memory) <= 0:

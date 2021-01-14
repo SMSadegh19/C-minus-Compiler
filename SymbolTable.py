@@ -29,13 +29,14 @@ class SymbolTable:
 
 class Symbol:
     def __init__(self, *, lexeme: str, var_type: str, addressing_type: str, address: int, scope: int,
-                 symbol_type: str):
+                 symbol_type: str, arguments_count=0):
         self.lexeme = lexeme
         self.type = symbol_type
         self.addressing_type = addressing_type
         self.address = address
         self.scope = scope
         self.var_type = var_type
+        self.arguments_count = arguments_count
 
     def __str__(self):
         return 'lexeme: %s, type: %s, addressing_type: %s, address: %s, scope: %s, var_type: %s' % \
