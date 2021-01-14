@@ -20,3 +20,21 @@ def semantic_check(*, check_error, p1='', p2='', p3='', p4=''):
     elif check_error == 'arguments_count':
         # 3
         semantic_errors_file.write("Mismatch in numbers of arguments of \'%s\'.\n" % p1)
+    elif check_error == 'type_operation':
+        semantic_errors_file.write("Type mismatch in operands, Got %s instead of %s.\n" % (p1, p2))
+    elif check_error == 'argument_type':
+        # todo 6
+        semantic_errors_file.write(
+            "Mismatch in type of argument %s of \'%s\'. Expected \'%s\' but got \'%s\' instead.\n" % (p1, p2, p3, p4))
+
+
+def check_that_are_int(symbols: list):
+    has_error = False
+    for symbol in symbols:
+        if symbol is not None and symbol.var_type == 'int*':
+            semantic_check(check_error='type_operation', p1='array', p2='int')
+            has_error = True
+        elif symbol is not None and symbol.type == 'function':
+            semantic_check(check_error='type_operation', p1='function', p2='int')
+            has_error = True
+    return has_error

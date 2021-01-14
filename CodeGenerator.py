@@ -2,6 +2,7 @@ import typing
 import re
 from SymbolTable import *
 from ScopeHandler import ScopeEntry
+import SemanticChecker
 from SemanticChecker import semantic_check
 
 symbol_table = SymbolTable()
@@ -374,6 +375,7 @@ def new_generate_code(*, action: str, label: str):
         semantic_stack.append('SUB')
     elif action == '#add_or_subtract':
         operator = semantic_stack[-2]
+        SemanticChecker.check_that_are_int([semantic_stack[-3], semantic_stack[-1]])
         first_operand_address = get_symbol_address(semantic_stack[-3])
         second_operand_address = get_symbol_address(semantic_stack[-1])
         relative_address = function_memory[-1].frame_size
@@ -500,6 +502,7 @@ def new_generate_code(*, action: str, label: str):
     elif action == '#push_is_equal_comparator':
         semantic_stack.append('EQ')
     elif action == '#relop':
+        SemanticChecker.check_that_are_int([semantic_stack[-3], semantic_stack[-1]])
         first_operand_address = get_symbol_address(semantic_stack[-3])
         operator = semantic_stack[-2]
         second_operand_address = get_symbol_address(semantic_stack[-1])
@@ -515,6 +518,7 @@ def new_generate_code(*, action: str, label: str):
             Symbol(lexeme="", var_type='int', addressing_type='relative', address=relative_address, scope=-1,
                    symbol_type='variable'))
     elif action == '#negate':
+        SemanticChecker.check_that_are_int([semantic_stack[-1]])
         first_operand_address = get_symbol_address(semantic_stack[-1])
         relative_address = function_memory[-1].frame_size
         result_address = get_by_relative_address(relative_address)
@@ -548,6 +552,7 @@ def generate_code(*, action: str, label: str):
         write_to_program_block(code="(ASSIGN, #%s, %d, )" % (b, temp_address))
         semantic_stack.append(temp_address)
     elif action == '#multiply':
+        SemanticChecker.check_that_are_int([semantic_stack[-2], semantic_stack[-1]])
         first_operand_address = semantic_stack[-1]
         second_operand_address = semantic_stack[-2]
         semantic_stack.pop()
@@ -558,6 +563,7 @@ def generate_code(*, action: str, label: str):
         semantic_stack.append(temp_address)
     elif action == "#assign":
         # print("         ", semantic_stack)
+        SemanticChecker.check_that_are_int([semantic_stack[-2], semantic_stack[-1]])
         destination = semantic_stack[-2]
         source = semantic_stack[-1]
         semantic_stack.pop()
